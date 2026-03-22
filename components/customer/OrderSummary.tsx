@@ -30,12 +30,21 @@ interface Props {
   tableNumber: number
   qrToken: string
   onClose: () => void
+  onOrderMore: () => void
 }
 
-export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose }: Props) {
+export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose, onOrderMore }: Props) {
   const [orders, setOrders] = useState<OrderDetail[]>([])
-  const [submitting, setSubmitting] = useState(false)
-  const [requested, setRequested] = useState(false)
+
+  // Bill confirmation flow
+  const [showBillConfirm, setShowBillConfirm] = useState(false)
+  const [billSubmitting, setBillSubmitting] = useState(false)
+  const [billRequested, setBillRequested] = useState(false)
+
+  // Call staff state
+  const [callingStaff, setCallingStaff] = useState(false)
+  const [staffCalled, setStaffCalled] = useState(false)
+  const [staffError, setStaffError] = useState<string | null>(null)
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient()
@@ -52,17 +61,103 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
     ), 0
   )
 
-  async function handleRequestBill() {
-    setSubmitting(true)
-    await fetch('/api/notifications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tableId, type: 'bill_request' }),
-    })
-    setRequested(true)
-    setSubmitting(false)
+  async function handleCallStaff() {
+    setCallingStaff(true)
+    setStaffError(null)
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tableId, type: 'call_staff' }),
+      })
+      if (!res.ok) throw new Error('การแจ้งเตือนล้มเหลว')
+      setStaffCalled(true)
+    } catch (err) {
+      setStaffError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด')
+    } finally {
+      setCallingStaff(false)
+    }
   }
 
+  async function handleConfirmBill() {
+    setBillSubmitting(true)
+    try {
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tableId, type: 'bill_request' }),
+      })
+      setBillRequested(true)
+    } finally {
+      setBillSubmitting(false)
+    }
+  }
+
+  // ─── Bill confirmation view ──────────────────────────────────────────────
+  if (showBillConfirm) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col justify-end">
+        <div
+          className="absolute inset-0 bg-black/50"
+          onClick={() => { if (!billRequested) setShowBillConfirm(false) }}
+        />
+        <div className="relative bg-white rounded-t-2xl max-h-[85vh] flex flex-col">
+          <div className="p-4 border-b flex justify-between items-center">
+            <h2 className="text-lg font-bold">ยืนยันขอเช็คบิล — โต๊ะ {tableNumber}</h2>
+            {!billRequested && (
+              <button onClick={() => setShowBillConfirm(false)} className="text-gray-400 text-2xl leading-none">✕</button>
+            )}
+          </div>
+
+          <div className="overflow-y-auto flex-1 p-4 space-y-4">
+            {orders.map(order => {
+              const roundTotal = (order.order_items ?? []).reduce(
+                (s, item) => s + item.unit_price * item.quantity, 0
+              )
+              return (
+                <div key={order.id} className="border rounded-xl p-3">
+                  <p className="text-xs text-gray-400 font-semibold uppercase mb-2">รอบที่ {order.round}</p>
+                  {(order.order_items ?? []).map(item => (
+                    <div key={item.id} className="flex justify-between text-sm py-1">
+                      <span>{item.menu_item.name_th} × {item.quantity}</span>
+                      <span>{formatPrice(item.unit_price * item.quantity)}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between text-sm font-medium pt-2 border-t mt-2 text-gray-600">
+                    <span>รวมรอบที่ {order.round}</span>
+                    <span>{formatPrice(roundTotal)}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="p-4 border-t space-y-3">
+            <div className="flex justify-between font-bold text-xl">
+              <span>รวมทั้งหมด</span>
+              <span className="text-orange-500">{formatPrice(total)}</span>
+            </div>
+
+            {billRequested ? (
+              <div className="bg-green-50 text-green-700 text-center p-3 rounded-xl font-medium">
+                ✅ แจ้งเรียบร้อยแล้ว พนักงานจะมาหาคุณในไม่ช้า
+              </div>
+            ) : (
+              <button
+                onClick={handleConfirmBill}
+                disabled={billSubmitting}
+                className="w-full bg-red-500 text-white py-3 rounded-xl font-bold text-lg disabled:opacity-50 hover:bg-red-600 transition-colors"
+              >
+                {billSubmitting ? 'กำลังส่ง...' : '🧾 ยืนยันขอเช็คบิล'}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ─── Main order summary view ─────────────────────────────────────────────
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
@@ -91,26 +186,32 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
           ))}
         </div>
 
-        <div className="p-4 border-t space-y-3">
-          <div className="flex justify-between font-bold text-xl">
-            <span>รวมทั้งหมด</span>
-            <span className="text-orange-500">{formatPrice(total)}</span>
-          </div>
-
-          {requested ? (
-            <div className="bg-green-50 text-green-700 text-center p-3 rounded-xl font-medium">
-              ✅ แจ้งเรียบร้อยแล้ว พนักงานกำลังมา
-            </div>
-          ) : (
-            <button
-              onClick={handleRequestBill}
-              disabled={submitting}
-              className="w-full bg-red-500 text-white py-3 rounded-xl font-bold text-lg disabled:opacity-50 hover:bg-red-600 transition-colors"
-            >
-              {submitting ? 'กำลังส่ง...' : '🧾 ขอเช็คบิล'}
-            </button>
+        <div className="p-4 border-t space-y-2">
+          {staffError && (
+            <p className="text-center text-xs text-red-500">{staffError}</p>
           )}
-          <p className="text-center text-xs text-gray-400">พนักงานจะมาหาคุณในไม่ช้า</p>
+
+          <button
+            onClick={onOrderMore}
+            className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-orange-600 transition-colors"
+          >
+            🛒 สั่งเพิ่ม
+          </button>
+
+          <button
+            onClick={handleCallStaff}
+            disabled={callingStaff || staffCalled}
+            className="w-full bg-yellow-400 text-yellow-900 py-3 rounded-xl font-bold text-lg disabled:opacity-60 hover:bg-yellow-500 transition-colors"
+          >
+            {callingStaff ? 'กำลังแจ้ง...' : staffCalled ? '✅ เรียกแล้ว' : '🙋 เรียกพนักงาน'}
+          </button>
+
+          <button
+            onClick={() => setShowBillConfirm(true)}
+            className="w-full bg-pink-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-pink-600 transition-colors"
+          >
+            🧾 ขอเช็คบิล
+          </button>
         </div>
       </div>
     </div>

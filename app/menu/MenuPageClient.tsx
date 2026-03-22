@@ -18,12 +18,36 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
   const [placedOrderIds, setPlacedOrderIds] = useState<string[]>([])
   const [showSummary, setShowSummary] = useState(false)
 
+  const [callStaffLoading, setCallStaffLoading] = useState(false)
+  const [callStaffSuccess, setCallStaffSuccess] = useState(false)
+  const [callStaffError, setCallStaffError] = useState<string | null>(null)
+
   const filtered = activeCategoryId
     ? menuItems.filter(i => i.category_id === activeCategoryId)
     : menuItems
 
   function handleOrderPlaced(orderId: string) {
     setPlacedOrderIds(prev => [...prev, orderId])
+  }
+
+  async function handleCallStaff() {
+    setCallStaffLoading(true)
+    setCallStaffError(null)
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tableId: table.id, type: 'call_staff' }),
+      })
+      if (!res.ok) throw new Error('การแจ้งเตือนล้มเหลว')
+      setCallStaffSuccess(true)
+      setTimeout(() => setCallStaffSuccess(false), 3000)
+    } catch (err) {
+      setCallStaffError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด')
+      setTimeout(() => setCallStaffError(null), 4000)
+    } finally {
+      setCallStaffLoading(false)
+    }
   }
 
   return (
@@ -52,25 +76,27 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
 
       {/* Post-order action buttons */}
       {placedOrderIds.length > 0 && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 flex gap-2 z-40">
-          <button
-            onClick={() => {
-              fetch('/api/notifications', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tableId: table.id, type: 'call_staff' }),
-              })
-            }}
-            className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-medium shadow-md"
-          >
-            🙋 เรียกพนักงาน
-          </button>
-          <button
-            onClick={() => setShowSummary(true)}
-            className="bg-pink-100 text-pink-800 px-4 py-2 rounded-full text-sm font-medium shadow-md"
-          >
-            🧾 เช็คบิล
-          </button>
+        <div className="fixed bottom-24 left-0 right-0 flex flex-col items-center gap-1 z-40">
+          {callStaffError && (
+            <span className="bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full shadow">
+              {callStaffError}
+            </span>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={handleCallStaff}
+              disabled={callStaffLoading || callStaffSuccess}
+              className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-medium shadow-md disabled:opacity-60 transition-colors"
+            >
+              {callStaffLoading ? 'กำลังแจ้ง...' : callStaffSuccess ? '✅ เรียกแล้ว' : '🙋 เรียกพนักงาน'}
+            </button>
+            <button
+              onClick={() => setShowSummary(true)}
+              className="bg-pink-100 text-pink-800 px-4 py-2 rounded-full text-sm font-medium shadow-md"
+            >
+              🧾 เช็คบิล
+            </button>
+          </div>
         </div>
       )}
 
@@ -89,6 +115,7 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
           tableNumber={table.number}
           qrToken={table.qr_token}
           onClose={() => setShowSummary(false)}
+          onOrderMore={() => setShowSummary(false)}
         />
       )}
     </div>
