@@ -112,3 +112,13 @@ CREATE TABLE notifications (
   is_read    boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Performance indexes on FK columns
+CREATE INDEX idx_sessions_table_id ON sessions(table_id);
+CREATE INDEX idx_orders_session_id ON orders(session_id);
+CREATE INDEX idx_orders_table_id ON orders(table_id);
+CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX idx_order_items_menu_item_id ON order_items(menu_item_id);
+CREATE INDEX idx_notifications_table_id ON notifications(table_id);
+CREATE INDEX idx_notifications_is_read ON notifications(is_read) WHERE is_read = false;
+CREATE INDEX idx_menu_items_category_id ON menu_items(category_id);

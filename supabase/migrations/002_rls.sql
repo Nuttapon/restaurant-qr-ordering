@@ -29,15 +29,13 @@ CREATE POLICY "staff crud items" ON menu_items
 CREATE POLICY "staff read sessions" ON sessions FOR SELECT TO authenticated USING (true);
 CREATE POLICY "staff update sessions" ON sessions FOR UPDATE TO authenticated USING (true);
 
--- orders: anon insert (token verified in RPC); anon read own session's orders
+-- orders: anon insert (token verified in RPC); reads go through get_session_summary RPC
 CREATE POLICY "anon insert orders" ON orders FOR INSERT TO anon WITH CHECK (true);
-CREATE POLICY "anon read own orders" ON orders FOR SELECT TO anon USING (true);
 CREATE POLICY "staff read orders" ON orders FOR SELECT TO authenticated USING (true);
 CREATE POLICY "staff update orders" ON orders FOR UPDATE TO authenticated USING (true);
 
 -- order_items: similar to orders
 CREATE POLICY "anon insert order_items" ON order_items FOR INSERT TO anon WITH CHECK (true);
-CREATE POLICY "anon read order_items" ON order_items FOR SELECT TO anon USING (true);
 CREATE POLICY "staff read order_items" ON order_items FOR SELECT TO authenticated USING (true);
 CREATE POLICY "staff update order_items" ON order_items FOR UPDATE TO authenticated USING (true);
 
