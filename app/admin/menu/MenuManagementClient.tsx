@@ -41,6 +41,10 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
   const [itemError, setItemError] = useState<string | null>(null)
 
+  // Inline delete confirmation state
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null)
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null)
+
   const supabase = getSupabaseBrowserClient()
 
   // ---- Categories ----
@@ -131,8 +135,6 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
   }
 
   async function handleDeleteCategory(cat: MenuCategory) {
-    if (!confirm(`Delete category "${cat.name_th}"? This cannot be undone.`)) return
-
     const { error } = await supabase.from('menu_categories').delete().eq('id', cat.id)
     if (error) {
       setCategoryError(error.message)
@@ -186,8 +188,6 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
   }
 
   async function handleDeleteItem(item: MenuItem) {
-    if (!confirm(`Delete item "${item.name_th}"? This cannot be undone.`)) return
-
     const { error } = await supabase.from('menu_items').delete().eq('id', item.id)
     if (error) {
       setItemError(error.message)
@@ -215,8 +215,8 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
           onClick={() => setActiveTab('categories')}
           className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'categories'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
+              : 'border-transparent text-[var(--brand-text-secondary)] hover:text-[var(--brand-text-primary)]'
           }`}
         >
           Categories ({categories.length})
@@ -225,8 +225,8 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
           onClick={() => setActiveTab('items')}
           className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'items'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'border-[var(--brand-primary)] text-[var(--brand-primary)]'
+              : 'border-transparent text-[var(--brand-text-secondary)] hover:text-[var(--brand-text-primary)]'
           }`}
         >
           Menu Items ({menuItems.length})
@@ -241,7 +241,7 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
             {!showCategoryForm && (
               <button
                 onClick={openAddCategory}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                className="bg-[var(--brand-primary)] text-white px-4 py-2 rounded-lg text-sm hover:bg-[var(--brand-primary-hover)] transition-colors"
               >
                 + Add Category
               </button>
@@ -261,7 +261,7 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
                     type="text"
                     value={categoryForm.name_th}
                     onChange={e => setCategoryForm(f => ({ ...f, name_th: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                     placeholder="ชื่อภาษาไทย"
                   />
                 </div>
@@ -271,7 +271,7 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
                     type="text"
                     value={categoryForm.name_en}
                     onChange={e => setCategoryForm(f => ({ ...f, name_en: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                     placeholder="English name"
                   />
                 </div>
@@ -281,7 +281,7 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
                     type="number"
                     value={categoryForm.sort_order}
                     onChange={e => setCategoryForm(f => ({ ...f, sort_order: Number(e.target.value) }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                   />
                 </div>
               </div>
@@ -294,7 +294,7 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
                 <button
                   onClick={handleSaveCategory}
                   disabled={categoryLoading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="bg-[var(--brand-primary)] text-white px-4 py-2 rounded-lg text-sm hover:bg-[var(--brand-primary-hover)] disabled:opacity-50 transition-colors"
                 >
                   {categoryLoading ? 'Saving…' : 'Save'}
                 </button>
@@ -340,16 +340,35 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
 
                 <button
                   onClick={() => openEditCategory(cat)}
-                  className="text-blue-600 hover:text-blue-800 text-sm px-2 py-1"
+                  className="text-[var(--brand-primary)] hover:text-[var(--brand-primary-hover)] text-sm px-2 py-1"
                 >
                   Edit
                 </button>
-                <button
-                  onClick={() => handleDeleteCategory(cat)}
-                  className="text-red-500 hover:text-red-700 text-sm px-2 py-1"
-                >
-                  Delete
-                </button>
+
+                {deletingCategoryId === cat.id ? (
+                  <div className="flex items-center gap-2 animate-fade-in">
+                    <span className="text-xs text-[var(--brand-text-secondary)]">ลบ?</span>
+                    <button
+                      onClick={async () => { await handleDeleteCategory(cat); setDeletingCategoryId(null) }}
+                      className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      ยืนยัน
+                    </button>
+                    <button
+                      onClick={() => setDeletingCategoryId(null)}
+                      className="text-xs text-[var(--brand-text-muted)] hover:text-[var(--brand-text-secondary)] transition-colors"
+                    >
+                      ยกเลิก
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setDeletingCategoryId(cat.id)}
+                    className="text-red-500 hover:text-red-700 text-sm px-2 py-1 transition-colors"
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -368,7 +387,7 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
             {!showItemForm && (
               <button
                 onClick={openAddItem}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                className="bg-[var(--brand-primary)] text-white px-4 py-2 rounded-lg text-sm hover:bg-[var(--brand-primary-hover)] transition-colors"
               >
                 + Add Item
               </button>
@@ -401,6 +420,8 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
                   <ItemRow
                     key={item.id}
                     item={item}
+                    deletingItemId={deletingItemId}
+                    setDeletingItemId={setDeletingItemId}
                     onToggleAvailable={() => handleToggleItemAvailable(item)}
                     onEdit={() => openEditItem(item)}
                     onDelete={() => handleDeleteItem(item)}
@@ -420,6 +441,8 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
                   <ItemRow
                     key={item.id}
                     item={item}
+                    deletingItemId={deletingItemId}
+                    setDeletingItemId={setDeletingItemId}
                     onToggleAvailable={() => handleToggleItemAvailable(item)}
                     onEdit={() => openEditItem(item)}
                     onDelete={() => handleDeleteItem(item)}
@@ -441,11 +464,15 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
 // Sub-component for a single item row
 function ItemRow({
   item,
+  deletingItemId,
+  setDeletingItemId,
   onToggleAvailable,
   onEdit,
   onDelete,
 }: {
   item: MenuItem
+  deletingItemId: string | null
+  setDeletingItemId: (id: string | null) => void
   onToggleAvailable: () => void
   onEdit: () => void
   onDelete: () => void
@@ -468,7 +495,7 @@ function ItemRow({
           {item.name_th}
           <span className="text-gray-400 font-normal ml-2">/ {item.name_en}</span>
         </p>
-        <p className="text-sm text-blue-700 font-semibold">{formatPrice(item.price)}</p>
+        <p className="text-sm text-[var(--brand-primary)] font-semibold">{formatPrice(item.price)}</p>
       </div>
 
       {/* is_available toggle */}
@@ -485,16 +512,35 @@ function ItemRow({
 
       <button
         onClick={onEdit}
-        className="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 flex-shrink-0"
+        className="text-[var(--brand-primary)] hover:text-[var(--brand-primary-hover)] text-sm px-2 py-1 flex-shrink-0"
       >
         Edit
       </button>
-      <button
-        onClick={onDelete}
-        className="text-red-500 hover:text-red-700 text-sm px-2 py-1 flex-shrink-0"
-      >
-        Delete
-      </button>
+
+      {deletingItemId === item.id ? (
+        <div className="flex items-center gap-2 animate-fade-in flex-shrink-0">
+          <span className="text-xs text-[var(--brand-text-secondary)]">ลบ?</span>
+          <button
+            onClick={async () => { await onDelete(); setDeletingItemId(null) }}
+            className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 transition-colors"
+          >
+            ยืนยัน
+          </button>
+          <button
+            onClick={() => setDeletingItemId(null)}
+            className="text-xs text-[var(--brand-text-muted)] hover:text-[var(--brand-text-secondary)] transition-colors"
+          >
+            ยกเลิก
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setDeletingItemId(item.id)}
+          className="text-red-500 hover:text-red-700 text-sm px-2 py-1 flex-shrink-0 transition-colors"
+        >
+          Delete
+        </button>
+      )}
     </div>
   )
 }

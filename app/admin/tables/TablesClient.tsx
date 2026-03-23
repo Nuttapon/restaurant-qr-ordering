@@ -33,7 +33,7 @@ function QRModal({ table, baseUrl, onClose }: QRModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-lg p-6 w-80 flex flex-col items-center gap-4"
+        className="bg-white rounded-xl shadow-lg p-6 w-80 flex flex-col items-center gap-4 animate-scale-in"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between w-full">
@@ -58,7 +58,7 @@ function QRModal({ table, baseUrl, onClose }: QRModalProps) {
 
         <button
           onClick={handleDownload}
-          className="w-full bg-gray-800 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+          className="w-full bg-[var(--brand-text-primary)] text-white py-2 rounded-lg text-sm font-medium hover:bg-[var(--brand-text-primary)]/80 transition-colors"
         >
           Download PNG
         </button>
@@ -72,9 +72,9 @@ interface Props {
 }
 
 const STATUS_BADGE: Record<Table['status'], string> = {
-  available: 'bg-green-100 text-green-800',
-  occupied: 'bg-yellow-100 text-yellow-800',
-  bill_requested: 'bg-pink-100 text-pink-800',
+  available: 'bg-[var(--brand-status-available-bg)]/20 text-[var(--brand-status-available-bg)]',
+  occupied: 'bg-[var(--brand-status-occupied-bg)]/20 text-[var(--brand-status-occupied-bg)]',
+  bill_requested: 'bg-[var(--brand-status-bill-bg)]/20 text-[var(--brand-status-bill-bg)]',
 }
 
 export function TablesClient({ tables: initialTables }: Props) {
@@ -82,16 +82,15 @@ export function TablesClient({ tables: initialTables }: Props) {
   const [selectedTable, setSelectedTable] = useState<Table | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [baseUrl, setBaseUrl] = useState('')
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [newTableNumber, setNewTableNumber] = useState('')
 
   useEffect(() => {
     setBaseUrl(window.location.origin)
   }, [])
 
-  async function handleAddTable() {
-    const input = window.prompt('Enter table number:')
-    if (input === null) return
-
-    const tableNumber = parseInt(input, 10)
+  async function handleAddTableSubmit() {
+    const tableNumber = parseInt(newTableNumber, 10)
     if (isNaN(tableNumber) || tableNumber <= 0) {
       setError('Invalid table number. Please enter a positive integer.')
       return
@@ -113,6 +112,8 @@ export function TablesClient({ tables: initialTables }: Props) {
 
     setError(null)
     setTables(prev => [...prev, data as Table].sort((a, b) => a.number - b.number))
+    setShowAddForm(false)
+    setNewTableNumber('')
   }
 
   return (
@@ -131,12 +132,39 @@ export function TablesClient({ tables: initialTables }: Props) {
 
       <div className="flex justify-between items-center mb-4">
         <p className="text-sm text-gray-500">{tables.length} table{tables.length !== 1 ? 's' : ''}</p>
-        <button
-          onClick={handleAddTable}
-          className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
-        >
-          + Add Table
-        </button>
+        {showAddForm ? (
+          <div className="flex items-center gap-2 animate-fade-in">
+            <input
+              type="number"
+              value={newTableNumber}
+              onChange={e => setNewTableNumber(e.target.value)}
+              placeholder="โต๊ะ #"
+              className="w-24 border border-[var(--brand-text-muted)]/20 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--brand-primary)] focus:outline-none bg-white"
+              autoFocus
+              onKeyDown={e => { if (e.key === 'Enter') handleAddTableSubmit(); if (e.key === 'Escape') { setShowAddForm(false); setNewTableNumber('') } }}
+            />
+            <button
+              onClick={handleAddTableSubmit}
+              disabled={!newTableNumber}
+              className="bg-[var(--brand-primary)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--brand-primary-hover)] transition-colors disabled:opacity-50"
+            >
+              เพิ่ม
+            </button>
+            <button
+              onClick={() => { setShowAddForm(false); setNewTableNumber('') }}
+              className="text-[var(--brand-text-muted)] hover:text-[var(--brand-text-secondary)] text-sm transition-colors"
+            >
+              ยกเลิก
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="bg-[var(--brand-primary)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--brand-primary-hover)] transition-colors"
+          >
+            + เพิ่มโต๊ะ
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow overflow-hidden">
@@ -174,7 +202,7 @@ export function TablesClient({ tables: initialTables }: Props) {
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => setSelectedTable(table)}
-                      className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-500 transition-colors"
+                      className="bg-[var(--brand-primary)] text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-[var(--brand-primary-hover)] transition-colors"
                     >
                       QR Code
                     </button>

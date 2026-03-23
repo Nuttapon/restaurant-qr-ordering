@@ -170,7 +170,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
           <select
             value={categoryId}
             onChange={e => setCategoryId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
           >
             {categories.map(cat => (
               <option key={cat.id} value={cat.id}>
@@ -188,7 +188,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
             value={nameTh}
             onChange={e => setNameTh(e.target.value)}
             placeholder="ชื่อภาษาไทย"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
           />
         </div>
 
@@ -200,7 +200,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
             value={nameEn}
             onChange={e => setNameEn(e.target.value)}
             placeholder="English name"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
           />
         </div>
 
@@ -238,7 +238,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
             min="0"
             step="0.01"
             placeholder="0.00"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
           />
         </div>
 
@@ -249,7 +249,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
             type="number"
             value={sortOrder}
             onChange={e => setSortOrder(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
           />
         </div>
 
@@ -260,7 +260,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
             type="checkbox"
             checked={isAvailable}
             onChange={e => setIsAvailable(e.target.checked)}
-            className="w-4 h-4 text-blue-600 rounded"
+            className="w-4 h-4 accent-[var(--brand-primary)] rounded"
           />
           <label htmlFor="is_available" className="text-sm font-medium text-gray-600">
             Available for ordering
@@ -275,7 +275,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            className="block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[var(--brand-primary-light)] file:text-[var(--brand-primary)] hover:file:bg-[var(--brand-primary-light)]/80"
           />
           {imagePreview && (
             <div className="relative w-24 h-24 mt-2 rounded-lg overflow-hidden border border-gray-200">
@@ -293,7 +293,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="bg-[var(--brand-primary)] text-white px-5 py-2 rounded-lg text-sm hover:bg-[var(--brand-primary-hover)] disabled:opacity-50 transition-colors"
         >
           {loading ? 'Saving…' : isEdit ? 'Update Item' : 'Add Item'}
         </button>
