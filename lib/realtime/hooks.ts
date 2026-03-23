@@ -32,10 +32,7 @@ export function useAdminNotifications(onNew: (n: Notification) => void) {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications' },
-        (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
-          const n = payload.new as Notification
-          if (['call_staff', 'bill_request'].includes(n.type)) onNew(n)
-        }
+        (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => onNew(payload.new as Notification)
       )
       .subscribe()
     return () => { supabase.removeChannel(channel) }

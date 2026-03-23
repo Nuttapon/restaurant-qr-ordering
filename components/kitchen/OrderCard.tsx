@@ -14,6 +14,16 @@ export function OrderCard({ order }: { order: OrderWithItems }) {
   const [items, setItems] = useState(order.order_items)
 
   const allDone = items.length > 0 && items.every(i => i.status === 'done')
+  const doneCount = items.filter(i => i.status === 'done').length
+
+  const elapsedMin = Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000)
+  const urgencyBorder = allDone
+    ? 'border-green-500/50'
+    : elapsedMin >= 10
+      ? 'border-red-500'
+      : elapsedMin >= 5
+        ? 'border-yellow-400'
+        : 'border-[var(--brand-kitchen-border)]'
 
   async function handleMarkDone(itemId: string) {
     const supabase = getSupabaseBrowserClient()
@@ -31,8 +41,9 @@ export function OrderCard({ order }: { order: OrderWithItems }) {
   return (
     <div
       className={cn(
-        'rounded-xl border-2 p-4 bg-slate-800 flex flex-col gap-3',
-        allDone ? 'border-green-500 opacity-50' : 'border-slate-600'
+        'rounded-xl border-2 p-4 bg-[var(--brand-kitchen-card)] flex flex-col gap-3',
+        allDone ? 'opacity-50' : '',
+        urgencyBorder
       )}
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -43,6 +54,18 @@ export function OrderCard({ order }: { order: OrderWithItems }) {
         </div>
         <TimerBadge createdAt={order.created_at} />
       </div>
+
+      {!allDone && items.length > 1 && (
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-green-500 transition-all duration-300"
+              style={{ width: `${(doneCount / items.length) * 100}%` }}
+            />
+          </div>
+          <span className="text-xs text-[var(--brand-text-muted)]">{doneCount}/{items.length}</span>
+        </div>
+      )}
 
       <ul className="flex flex-col gap-2">
         {items.map(item => (

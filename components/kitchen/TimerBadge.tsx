@@ -30,7 +30,7 @@ export function TimerBadge({ createdAt }: Props) {
         : 'bg-red-500 text-white animate-pulse'
 
   return (
-    <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', colorClass)}>
+    <span className={cn('text-xs font-semibold tabular-nums px-2.5 py-1 rounded-full', colorClass)}>
       {label}
     </span>
   )

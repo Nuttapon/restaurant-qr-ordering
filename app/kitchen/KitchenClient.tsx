@@ -42,24 +42,29 @@ export function KitchenClient({ initialOrders }: Props) {
   ).length
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      <div className="sticky top-0 z-10 bg-slate-800 border-b border-slate-700 px-4 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-[var(--brand-kitchen-bg)]">
+      <div className="sticky top-0 z-10 bg-[var(--brand-kitchen-card)] border-b border-[var(--brand-kitchen-border)] px-4 py-3 flex items-center justify-between">
         <h1 className="text-white font-bold text-xl">ครัว</h1>
-        <span className="bg-orange-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+        <span className="bg-[var(--brand-primary)] text-white text-sm font-bold px-3 py-1 rounded-full">
           {pendingCount} ออเดอร์
         </span>
       </div>
 
       <div className="p-4">
         {orders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-3">
-            <span className="text-4xl">✅</span>
-            <p className="text-slate-400 text-lg">ไม่มีออเดอร์ค้างอยู่</p>
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+              <span className="text-3xl">✅</span>
+            </div>
+            <p className="text-[var(--brand-text-muted)] text-lg font-medium">ไม่มีออเดอร์ค้างอยู่</p>
+            <p className="text-[#6B6460] text-sm">ออเดอร์ใหม่จะปรากฏที่นี่อัตโนมัติ</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {orders.map(order => (
-              <OrderCard key={order.id} order={order} />
+              <div key={order.id} className="animate-scale-in">
+                <OrderCard order={order} />
+              </div>
             ))}
           </div>
         )}
