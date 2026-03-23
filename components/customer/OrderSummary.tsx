@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
 import { useOrderItemUpdates } from '@/lib/realtime/hooks'
+import { useCallStaff } from '@/lib/hooks/useCallStaff'
 import { OrderItem } from '@/types/database'
 
 function OrderRealtimeListener({ orderId, onUpdate }: { orderId: string; onUpdate: (item: OrderItem) => void }) {
@@ -62,10 +63,7 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
   const [billRequested, setBillRequested] = useState(false)
   const [billError, setBillError] = useState<string | null>(null)
 
-  // Call staff state
-  const [callingStaff, setCallingStaff] = useState(false)
-  const [staffCalled, setStaffCalled] = useState(false)
-  const [staffError, setStaffError] = useState<string | null>(null)
+  const { callStaff: handleCallStaff, loading: callingStaff, success: staffCalled, error: staffError } = useCallStaff(sessionId, tableId)
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient()
@@ -90,24 +88,6 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
       s + item.unit_price * item.quantity, 0
     ), 0
   )
-
-  async function handleCallStaff() {
-    setCallingStaff(true)
-    setStaffError(null)
-    try {
-      const res = await fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, tableId, type: 'call_staff' }),
-      })
-      if (!res.ok) throw new Error('การแจ้งเตือนล้มเหลว')
-      setStaffCalled(true)
-    } catch (err) {
-      setStaffError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด')
-    } finally {
-      setCallingStaff(false)
-    }
-  }
 
   async function handleConfirmBill() {
     setBillSubmitting(true)

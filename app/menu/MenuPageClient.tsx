@@ -6,6 +6,7 @@ import { MenuItemCard } from '@/components/customer/MenuItemCard'
 import { CartDrawer } from '@/components/customer/CartDrawer'
 import { OrderSummary } from '@/components/customer/OrderSummary'
 import { useSoundAlert } from '@/components/shared/SoundAlert'
+import { useCallStaff } from '@/lib/hooks/useCallStaff'
 
 interface Props {
   session: Session
@@ -20,21 +21,14 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
   const [placedOrderIds, setPlacedOrderIds] = useState<string[]>([])
   const [showSummary, setShowSummary] = useState(false)
   const [orderToast, setOrderToast] = useState<number | null>(null) // stores round number
-
-  const [callStaffLoading, setCallStaffLoading] = useState(false)
-  const [callStaffSuccess, setCallStaffSuccess] = useState(false)
-  const [callStaffError, setCallStaffError] = useState<string | null>(null)
-
-  const callStaffSuccessTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const callStaffErrorTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const orderToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  
+  const { callStaff, loading: callStaffLoading, success: callStaffSuccess, error: callStaffError } = useCallStaff(session.id, table.id)
 
   const { playDing } = useSoundAlert()
 
   useEffect(() => {
     return () => {
-      if (callStaffSuccessTimer.current) clearTimeout(callStaffSuccessTimer.current)
-      if (callStaffErrorTimer.current) clearTimeout(callStaffErrorTimer.current)
       if (orderToastTimer.current) clearTimeout(orderToastTimer.current)
     }
   }, [])
@@ -55,28 +49,6 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
     setOrderToast(round)
     if (orderToastTimer.current) clearTimeout(orderToastTimer.current)
     orderToastTimer.current = setTimeout(() => setOrderToast(null), 3500)
-  }
-
-  async function handleCallStaff() {
-    setCallStaffLoading(true)
-    setCallStaffError(null)
-    try {
-      const res = await fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: session.id, tableId: table.id, type: 'call_staff' }),
-      })
-      if (!res.ok) throw new Error('การแจ้งเตือนล้มเหลว')
-      setCallStaffSuccess(true)
-      if (callStaffSuccessTimer.current) clearTimeout(callStaffSuccessTimer.current)
-      callStaffSuccessTimer.current = setTimeout(() => setCallStaffSuccess(false), 3000)
-    } catch (err) {
-      setCallStaffError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด')
-      if (callStaffErrorTimer.current) clearTimeout(callStaffErrorTimer.current)
-      callStaffErrorTimer.current = setTimeout(() => setCallStaffError(null), 4000)
-    } finally {
-      setCallStaffLoading(false)
-    }
   }
 
   return (
@@ -134,7 +106,7 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
           )}
           <div className="bg-white/80 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[var(--brand-shadow-lg)] mx-4 flex gap-2">
             <button
-              onClick={handleCallStaff}
+              onClick={callStaff}
               disabled={callStaffLoading || callStaffSuccess}
               className="bg-[var(--brand-status-occupied-bg)] text-[var(--brand-status-occupied)] border border-[var(--brand-status-occupied)]/20 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60"
             >
