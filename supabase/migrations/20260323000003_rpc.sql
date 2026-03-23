@@ -13,9 +13,10 @@ BEGIN
   END IF;
 
   -- Insert new active session only if none exists (safe after FOR UPDATE lock)
+  -- Use column + WHERE form (partial unique index, not a named constraint)
   INSERT INTO sessions (table_id, status)
   VALUES (v_table.id, 'active')
-  ON CONFLICT ON CONSTRAINT sessions_one_active_per_table DO NOTHING;
+  ON CONFLICT (table_id) WHERE status = 'active' DO NOTHING;
 
   -- Fetch the active session (new or pre-existing)
   SELECT * INTO v_session FROM sessions
