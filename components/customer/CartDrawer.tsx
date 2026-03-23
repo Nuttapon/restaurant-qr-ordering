@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function CartDrawer({ sessionId, tableId, onOrderPlaced }: Props) {
-  const { items, updateQuantity, clearCart, totalPrice } = useCartStore()
+  const { items, updateQuantity, updateNote, clearCart, totalPrice } = useCartStore()
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -82,23 +82,32 @@ export function CartDrawer({ sessionId, tableId, onOrderPlaced }: Props) {
             </div>
 
             <div className="overflow-y-auto flex-1 p-4 space-y-3">
-              {items.map(({ menuItem, quantity }) => (
-                <div key={menuItem.id} className="flex items-center gap-3">
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{menuItem.name_th}</p>
-                    <p className="text-[var(--brand-primary)] text-sm">{formatPrice(menuItem.price)}</p>
+              {items.map(({ menuItem, quantity, note }) => (
+                <div key={menuItem.id}>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{menuItem.name_th}</p>
+                      <p className="text-[var(--brand-primary)] text-sm">{formatPrice(menuItem.price)}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateQuantity(menuItem.id, quantity - 1)}
+                        className="w-8 h-8 rounded-full bg-[var(--brand-primary-light)] text-[var(--brand-primary)] font-bold text-lg flex items-center justify-center"
+                      >−</button>
+                      <span className="w-6 text-center font-bold">{quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(menuItem.id, quantity + 1)}
+                        className="w-8 h-8 rounded-full bg-[var(--brand-primary)] text-white font-bold text-lg flex items-center justify-center"
+                      >+</button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => updateQuantity(menuItem.id, quantity - 1)}
-                      className="w-8 h-8 rounded-full bg-[var(--brand-primary-light)] text-[var(--brand-primary)] font-bold text-lg flex items-center justify-center"
-                    >−</button>
-                    <span className="w-6 text-center font-bold">{quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(menuItem.id, quantity + 1)}
-                      className="w-8 h-8 rounded-full bg-[var(--brand-primary)] text-white font-bold text-lg flex items-center justify-center"
-                    >+</button>
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="หมายเหตุ เช่น ไม่เผ็ด"
+                    value={note ?? ''}
+                    onChange={(e) => updateNote(menuItem.id, e.target.value)}
+                    className="w-full mt-1 text-xs text-gray-500 border-b border-gray-200 bg-transparent outline-none placeholder-gray-300 py-0.5"
+                  />
                 </div>
               ))}
             </div>
