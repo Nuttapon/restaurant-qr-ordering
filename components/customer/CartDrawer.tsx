@@ -58,9 +58,9 @@ export function CartDrawer({ sessionId, tableId, onOrderPlaced }: Props) {
       {/* Floating cart button */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3 z-40 hover:bg-orange-600 transition-colors"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[var(--brand-primary)] text-white px-6 py-3.5 rounded-2xl shadow-lg flex items-center gap-3 z-40 transition-colors"
       >
-        <span className="bg-white text-orange-500 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+        <span className="bg-white text-[var(--brand-primary)] text-xs font-bold rounded-full px-1.5 flex items-center justify-center">
           {itemCount}
         </span>
         <span className="font-semibold">ดูตะกร้า</span>
@@ -71,12 +71,13 @@ export function CartDrawer({ sessionId, tableId, onOrderPlaced }: Props) {
       {open && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/50 animate-fade-in"
             onClick={() => setOpen(false)}
           />
-          <div className="relative bg-white rounded-t-2xl max-h-[80vh] flex flex-col">
+          <div className="relative bg-[var(--brand-surface-card)] rounded-t-3xl max-h-[80vh] flex flex-col animate-slide-up">
+            <div className="w-10 h-1 rounded-full bg-[var(--brand-text-muted)]/30 mx-auto pt-3 mb-1" />
             <div className="p-4 border-b flex justify-between items-center">
-              <h2 className="text-lg font-bold">รายการสั่ง</h2>
+              <h2 className="text-lg font-bold text-[var(--brand-text-primary)]">รายการสั่ง</h2>
               <button onClick={() => setOpen(false)} className="text-gray-400 text-2xl leading-none">✕</button>
             </div>
 
@@ -85,17 +86,17 @@ export function CartDrawer({ sessionId, tableId, onOrderPlaced }: Props) {
                 <div key={menuItem.id} className="flex items-center gap-3">
                   <div className="flex-1">
                     <p className="font-medium text-sm">{menuItem.name_th}</p>
-                    <p className="text-orange-500 text-sm">{formatPrice(menuItem.price)}</p>
+                    <p className="text-[var(--brand-primary)] text-sm">{formatPrice(menuItem.price)}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => updateQuantity(menuItem.id, quantity - 1)}
-                      className="w-8 h-8 rounded-full bg-gray-100 font-bold text-lg flex items-center justify-center"
+                      className="w-8 h-8 rounded-full bg-[var(--brand-primary-light)] text-[var(--brand-primary)] font-bold text-lg flex items-center justify-center"
                     >−</button>
                     <span className="w-6 text-center font-bold">{quantity}</span>
                     <button
                       onClick={() => updateQuantity(menuItem.id, quantity + 1)}
-                      className="w-8 h-8 rounded-full bg-orange-500 text-white font-bold text-lg flex items-center justify-center"
+                      className="w-8 h-8 rounded-full bg-[var(--brand-primary)] text-white font-bold text-lg flex items-center justify-center"
                     >+</button>
                   </div>
                 </div>
@@ -111,12 +112,12 @@ export function CartDrawer({ sessionId, tableId, onOrderPlaced }: Props) {
               )}
               <div className="flex justify-between font-bold text-lg">
                 <span>รวม</span>
-                <span className="text-orange-500">{formatPrice(total)}</span>
+                <span className="text-[var(--brand-primary)]">{formatPrice(total)}</span>
               </div>
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold text-lg disabled:opacity-50 hover:bg-orange-600 transition-colors"
+                className="w-full bg-[var(--brand-primary)] text-white py-3 rounded-xl font-bold text-lg disabled:opacity-50 hover:bg-[var(--brand-primary-hover)] transition-colors"
               >
                 {submitting ? 'กำลังส่ง...' : 'สั่งอาหาร ✓'}
               </button>

@@ -114,12 +114,13 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
     return (
       <div className="fixed inset-0 z-50 flex flex-col justify-end">
         <div
-          className="absolute inset-0 bg-black/50"
+          className="absolute inset-0 bg-black/50 animate-fade-in"
           onClick={() => { if (!billRequested) setShowBillConfirm(false) }}
         />
-        <div className="relative bg-white rounded-t-2xl max-h-[85vh] flex flex-col">
+        <div className="relative bg-[var(--brand-surface-card)] rounded-t-3xl max-h-[85vh] flex flex-col animate-slide-up">
+          <div className="w-10 h-1 rounded-full bg-[var(--brand-text-muted)]/30 mx-auto pt-3 mb-1" />
           <div className="p-4 border-b flex justify-between items-center">
-            <h2 className="text-lg font-bold">ยืนยันขอเช็คบิล — โต๊ะ {tableNumber}</h2>
+            <h2 className="text-lg font-bold text-[var(--brand-text-primary)]">ยืนยันขอเช็คบิล — โต๊ะ {tableNumber}</h2>
             {!billRequested && (
               <button onClick={() => setShowBillConfirm(false)} className="text-gray-400 text-2xl leading-none">✕</button>
             )}
@@ -131,7 +132,7 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
                 (s, item) => s + item.unit_price * item.quantity, 0
               )
               return (
-                <div key={order.id} className="border rounded-xl p-3">
+                <div key={order.id} className="bg-[var(--brand-surface)] rounded-xl p-4">
                   <p className="text-xs text-gray-400 font-semibold uppercase mb-2">รอบที่ {order.round}</p>
                   {(order.order_items ?? []).map(item => (
                     <div key={item.id} className="flex justify-between text-sm py-1">
@@ -151,7 +152,7 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
           <div className="p-4 border-t space-y-3">
             <div className="flex justify-between font-bold text-xl">
               <span>รวมทั้งหมด</span>
-              <span className="text-orange-500">{formatPrice(total)}</span>
+              <span className="text-[var(--brand-primary)]">{formatPrice(total)}</span>
             </div>
 
             {billError && (
@@ -180,16 +181,21 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
   // ─── Main order summary view ─────────────────────────────────────────────
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-t-2xl max-h-[85vh] flex flex-col">
+      <div className="absolute inset-0 bg-black/50 animate-fade-in" onClick={onClose} />
+      <div className="relative bg-[var(--brand-surface-card)] rounded-t-3xl max-h-[85vh] flex flex-col animate-slide-up">
+        <div className="w-10 h-1 rounded-full bg-[var(--brand-text-muted)]/30 mx-auto pt-3 mb-1" />
         <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-lg font-bold">สรุปรายการ — โต๊ะ {tableNumber}</h2>
+          <h2 className="text-lg font-bold text-[var(--brand-text-primary)]">สรุปรายการ — โต๊ะ {tableNumber}</h2>
           <button onClick={onClose} className="text-gray-400 text-2xl leading-none">✕</button>
         </div>
 
         <div className="overflow-y-auto flex-1 p-4 space-y-4">
           {loading && (
-            <p className="text-center text-gray-400 py-8">กำลังโหลด...</p>
+            <div className="space-y-3 py-4 px-4">
+              <div className="h-4 rounded bg-[var(--brand-text-muted)]/20 animate-pulse w-3/4" />
+              <div className="h-4 rounded bg-[var(--brand-text-muted)]/20 animate-pulse w-1/2" />
+              <div className="h-4 rounded bg-[var(--brand-text-muted)]/20 animate-pulse w-2/3" />
+            </div>
           )}
           {fetchError && (
             <p className="text-center text-red-500 py-8">{fetchError}</p>
@@ -219,7 +225,7 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
 
           <button
             onClick={onOrderMore}
-            className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-orange-600 transition-colors"
+            className="w-full bg-[var(--brand-primary)] text-white py-3 rounded-xl font-bold text-lg hover:bg-[var(--brand-primary-hover)] transition-colors"
           >
             สั่งเพิ่ม
           </button>
@@ -227,14 +233,14 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
           <button
             onClick={handleCallStaff}
             disabled={callingStaff || staffCalled}
-            className="w-full bg-yellow-400 text-yellow-900 py-3 rounded-xl font-bold text-lg disabled:opacity-60 hover:bg-yellow-500 transition-colors"
+            className="w-full bg-[var(--brand-status-occupied-bg)] text-[var(--brand-status-occupied)] border border-[var(--brand-status-occupied)]/20 py-3 rounded-xl font-bold text-lg disabled:opacity-60 transition-colors"
           >
             {callingStaff ? 'กำลังแจ้ง...' : staffCalled ? 'เรียกแล้ว' : 'เรียกพนักงาน'}
           </button>
 
           <button
             onClick={() => setShowBillConfirm(true)}
-            className="w-full bg-pink-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-pink-600 transition-colors"
+            className="w-full bg-[var(--brand-status-bill-bg)] text-[var(--brand-status-bill)] border border-[var(--brand-status-bill)]/20 py-3 rounded-xl font-bold text-lg transition-colors"
           >
             ขอเช็คบิล
           </button>
