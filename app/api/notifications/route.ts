@@ -9,6 +9,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
+  // Fix C1: Verify the table exists before inserting a notification
+  const { data: table, error: tableError } = await supabase
+    .from('tables')
+    .select('id')
+    .eq('id', tableId)
+    .single()
+  if (tableError || !table) {
+    return NextResponse.json({ error: 'Invalid table' }, { status: 403 })
+  }
+
   const { error } = await supabase
     .from('notifications')
     .insert({ table_id: tableId, type })

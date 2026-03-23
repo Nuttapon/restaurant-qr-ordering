@@ -35,11 +35,14 @@ interface Props {
 
 export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose, onOrderMore }: Props) {
   const [orders, setOrders] = useState<OrderDetail[]>([])
+  const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
 
   // Bill confirmation flow
   const [showBillConfirm, setShowBillConfirm] = useState(false)
   const [billSubmitting, setBillSubmitting] = useState(false)
   const [billRequested, setBillRequested] = useState(false)
+  const [billError, setBillError] = useState<string | null>(null)
 
   // Call staff state
   const [callingStaff, setCallingStaff] = useState(false)
@@ -48,10 +51,19 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient()
+    setLoading(true)
+    setFetchError(null)
     supabase
       .rpc('get_session_summary', { p_session_id: sessionId, p_qr_token: qrToken })
-      .then(({ data }: { data: unknown }) => {
-        if (Array.isArray(data)) setOrders(data as OrderDetail[])
+      .then(({ data, error }: { data: unknown; error: unknown }) => {
+        if (error) {
+          setFetchError('ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่')
+        } else if (Array.isArray(data)) {
+          setOrders(data as OrderDetail[])
+        }
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }, [sessionId, qrToken])
 
@@ -81,13 +93,17 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
 
   async function handleConfirmBill() {
     setBillSubmitting(true)
+    setBillError(null)
     try {
-      await fetch('/api/notifications', {
+      const res = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tableId, type: 'bill_request' }),
       })
+      if (!res.ok) throw new Error('การส่งคำขอล้มเหลว กรุณาลองใหม่')
       setBillRequested(true)
+    } catch (err) {
+      setBillError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด')
     } finally {
       setBillSubmitting(false)
     }
@@ -138,9 +154,13 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
               <span className="text-orange-500">{formatPrice(total)}</span>
             </div>
 
+            {billError && (
+              <p className="text-center text-sm text-red-500 bg-red-50 p-2 rounded-xl">{billError}</p>
+            )}
+
             {billRequested ? (
               <div className="bg-green-50 text-green-700 text-center p-3 rounded-xl font-medium">
-                ✅ แจ้งเรียบร้อยแล้ว พนักงานจะมาหาคุณในไม่ช้า
+                แจ้งเรียบร้อยแล้ว พนักงานจะมาหาคุณในไม่ช้า
               </div>
             ) : (
               <button
@@ -148,7 +168,7 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
                 disabled={billSubmitting}
                 className="w-full bg-red-500 text-white py-3 rounded-xl font-bold text-lg disabled:opacity-50 hover:bg-red-600 transition-colors"
               >
-                {billSubmitting ? 'กำลังส่ง...' : '🧾 ยืนยันขอเช็คบิล'}
+                {billSubmitting ? 'กำลังส่ง...' : 'ยืนยันขอเช็คบิล'}
               </button>
             )}
           </div>
@@ -168,7 +188,13 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
         </div>
 
         <div className="overflow-y-auto flex-1 p-4 space-y-4">
-          {orders.length === 0 && (
+          {loading && (
+            <p className="text-center text-gray-400 py-8">กำลังโหลด...</p>
+          )}
+          {fetchError && (
+            <p className="text-center text-red-500 py-8">{fetchError}</p>
+          )}
+          {!loading && !fetchError && orders.length === 0 && (
             <p className="text-center text-gray-400 py-8">ยังไม่มีรายการ</p>
           )}
           {orders.map(order => (
@@ -195,7 +221,7 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
             onClick={onOrderMore}
             className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-orange-600 transition-colors"
           >
-            🛒 สั่งเพิ่ม
+            สั่งเพิ่ม
           </button>
 
           <button
@@ -203,14 +229,14 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
             disabled={callingStaff || staffCalled}
             className="w-full bg-yellow-400 text-yellow-900 py-3 rounded-xl font-bold text-lg disabled:opacity-60 hover:bg-yellow-500 transition-colors"
           >
-            {callingStaff ? 'กำลังแจ้ง...' : staffCalled ? '✅ เรียกแล้ว' : '🙋 เรียกพนักงาน'}
+            {callingStaff ? 'กำลังแจ้ง...' : staffCalled ? 'เรียกแล้ว' : 'เรียกพนักงาน'}
           </button>
 
           <button
             onClick={() => setShowBillConfirm(true)}
             className="w-full bg-pink-500 text-white py-3 rounded-xl font-bold text-lg hover:bg-pink-600 transition-colors"
           >
-            🧾 ขอเช็คบิล
+            ขอเช็คบิล
           </button>
         </div>
       </div>

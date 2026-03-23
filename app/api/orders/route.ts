@@ -9,13 +9,46 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  // Get current round count for this session
-  const { count } = await supabase
-    .from('orders')
-    .select('*', { count: 'exact', head: true })
-    .eq('session_id', sessionId)
+  // Fix C1: Verify session exists, belongs to the given table, and is active
+  const { data: session, error: sessionError } = await supabase
+    .from('sessions')
+    .select('id, table_id, status')
+    .eq('id', sessionId)
+    .eq('table_id', tableId)
+    .eq('status', 'active')
+    .single()
+  if (sessionError || !session) {
+    return NextResponse.json({ error: 'Invalid or expired session' }, { status: 403 })
+  }
 
-  const round = (count ?? 0) + 1
+  // Fix C1: Re-fetch item prices from menu_items instead of trusting client-supplied unitPrice
+  const menuItemIds = items.map((i: { menuItemId: string }) => i.menuItemId)
+  const { data: menuItemRows, error: menuError } = await supabase
+    .from('menu_items')
+    .select('id, price, is_available')
+    .in('id', menuItemIds)
+  if (menuError || !menuItemRows) {
+    return NextResponse.json({ error: 'Failed to fetch menu items' }, { status: 500 })
+  }
+  // Check all items exist and are available
+  const priceMap = new Map(menuItemRows.map(m => [m.id, m]))
+  for (const item of items) {
+    const menuItem = priceMap.get(item.menuItemId)
+    if (!menuItem || !menuItem.is_available) {
+      return NextResponse.json({ error: `Item ${item.menuItemId} not available` }, { status: 400 })
+    }
+  }
+
+  // Fix M4: Use max round instead of count to avoid race condition
+  const { data: lastOrder } = await supabase
+    .from('orders')
+    .select('round')
+    .eq('session_id', sessionId)
+    .order('round', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const round = (lastOrder?.round ?? 0) + 1
 
   // Create order
   const { data: order, error: orderError } = await supabase
@@ -28,14 +61,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: orderError.message }, { status: 500 })
   }
 
-  // Create order items
+  // Create order items — use server-fetched prices
   const orderItems = items.map((item: {
     menuItemId: string; quantity: number; unitPrice: number; note?: string
   }) => ({
     order_id: order.id,
     menu_item_id: item.menuItemId,
     quantity: item.quantity,
-    unit_price: item.unitPrice,
+    unit_price: priceMap.get(item.menuItemId)!.price,
     note: item.note ?? null,
     status: 'pending',
   }))

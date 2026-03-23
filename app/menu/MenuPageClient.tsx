@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Session, Table, MenuCategory, MenuItem } from '@/types/database'
 import { CategoryTabs } from '@/components/customer/CategoryTabs'
 import { MenuItemCard } from '@/components/customer/MenuItemCard'
@@ -22,6 +22,17 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
   const [callStaffSuccess, setCallStaffSuccess] = useState(false)
   const [callStaffError, setCallStaffError] = useState<string | null>(null)
 
+  const callStaffSuccessTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const callStaffErrorTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Fix M5: Clean up timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (callStaffSuccessTimer.current) clearTimeout(callStaffSuccessTimer.current)
+      if (callStaffErrorTimer.current) clearTimeout(callStaffErrorTimer.current)
+    }
+  }, [])
+
   const filtered = activeCategoryId
     ? menuItems.filter(i => i.category_id === activeCategoryId)
     : menuItems
@@ -41,10 +52,12 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
       })
       if (!res.ok) throw new Error('การแจ้งเตือนล้มเหลว')
       setCallStaffSuccess(true)
-      setTimeout(() => setCallStaffSuccess(false), 3000)
+      if (callStaffSuccessTimer.current) clearTimeout(callStaffSuccessTimer.current)
+      callStaffSuccessTimer.current = setTimeout(() => setCallStaffSuccess(false), 3000)
     } catch (err) {
       setCallStaffError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด')
-      setTimeout(() => setCallStaffError(null), 4000)
+      if (callStaffErrorTimer.current) clearTimeout(callStaffErrorTimer.current)
+      callStaffErrorTimer.current = setTimeout(() => setCallStaffError(null), 4000)
     } finally {
       setCallStaffLoading(false)
     }
@@ -54,7 +67,7 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-orange-500 text-white px-4 py-3 flex justify-between items-center sticky top-0 z-30">
-        <h1 className="font-bold text-lg">🍜 เมนู</h1>
+        <h1 className="font-bold text-lg">เมนู</h1>
         <span className="text-sm bg-orange-400 px-3 py-1 rounded-full">โต๊ะ {table.number}</span>
       </div>
 
@@ -88,13 +101,13 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
               disabled={callStaffLoading || callStaffSuccess}
               className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-medium shadow-md disabled:opacity-60 transition-colors"
             >
-              {callStaffLoading ? 'กำลังแจ้ง...' : callStaffSuccess ? '✅ เรียกแล้ว' : '🙋 เรียกพนักงาน'}
+              {callStaffLoading ? 'กำลังแจ้ง...' : callStaffSuccess ? 'เรียกแล้ว' : 'เรียกพนักงาน'}
             </button>
             <button
               onClick={() => setShowSummary(true)}
               className="bg-pink-100 text-pink-800 px-4 py-2 rounded-full text-sm font-medium shadow-md"
             >
-              🧾 เช็คบิล
+              เช็คบิล
             </button>
           </div>
         </div>
