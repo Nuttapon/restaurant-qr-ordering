@@ -14,10 +14,10 @@ export function CategoryTabs({ categories, activeId, onSelect }: Props) {
       <button
         onClick={() => onSelect(null)}
         className={cn(
-          'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+          'rounded-full px-4 py-2 text-sm font-semibold flex-shrink-0 transition-colors',
           activeId === null
-            ? 'bg-orange-500 text-white'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            ? 'bg-[var(--brand-primary)] text-white shadow-sm'
+            : 'bg-[var(--brand-primary-light)] text-[var(--brand-text-secondary)] hover:opacity-80'
         )}
       >
         ทั้งหมด / All
@@ -27,10 +27,10 @@ export function CategoryTabs({ categories, activeId, onSelect }: Props) {
           key={cat.id}
           onClick={() => onSelect(cat.id)}
           className={cn(
-            'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap',
+            'rounded-full px-4 py-2 text-sm font-semibold flex-shrink-0 transition-colors whitespace-nowrap',
             activeId === cat.id
-              ? 'bg-orange-500 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? 'bg-[var(--brand-primary)] text-white shadow-sm'
+              : 'bg-[var(--brand-primary-light)] text-[var(--brand-text-secondary)] hover:opacity-80'
           )}
         >
           {cat.name_th}
