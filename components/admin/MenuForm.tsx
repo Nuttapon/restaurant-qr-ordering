@@ -212,7 +212,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
             onChange={e => setDescriptionTh(e.target.value)}
             placeholder="คำอธิบายภาษาไทย"
             rows={2}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
           />
         </div>
 
@@ -224,7 +224,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
             onChange={e => setDescriptionEn(e.target.value)}
             placeholder="English description"
             rows={2}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
           />
         </div>
 
