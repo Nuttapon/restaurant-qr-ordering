@@ -64,15 +64,15 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--brand-surface)]">
       {/* Header */}
-      <div className="bg-orange-500 text-white px-4 py-3 flex justify-between items-center sticky top-0 z-30">
+      <div className="bg-gradient-to-r from-[#D4622B] to-[#C7522A] shadow-md text-white px-4 py-3 flex justify-between items-center sticky top-0 z-30">
         <h1 className="font-bold text-lg">เมนู</h1>
-        <span className="text-sm bg-orange-400 px-3 py-1 rounded-full">โต๊ะ {table.number}</span>
+        <span className="text-sm bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full font-medium">โต๊ะ {table.number}</span>
       </div>
 
       {/* Category tabs */}
-      <div className="px-4 py-3 bg-white border-b sticky top-14 z-20">
+      <div className="px-4 py-3 bg-white shadow-[var(--brand-shadow-sm)] sticky top-14 z-20">
         <CategoryTabs
           categories={categories}
           activeId={activeCategoryId}
@@ -81,7 +81,7 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
       </div>
 
       {/* Menu items */}
-      <div className="px-4 py-3 space-y-3 pb-40">
+      <div className="px-4 py-3 space-y-3 pb-48">
         {filtered.map(item => (
           <MenuItemCard key={item.id} item={item} />
         ))}
@@ -95,17 +95,17 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
               {callStaffError}
             </span>
           )}
-          <div className="flex gap-2">
+          <div className="bg-white/80 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[var(--brand-shadow-lg)] mx-4 flex gap-2">
             <button
               onClick={handleCallStaff}
               disabled={callStaffLoading || callStaffSuccess}
-              className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-medium shadow-md disabled:opacity-60 transition-colors"
+              className="bg-[var(--brand-status-occupied-bg)] text-[var(--brand-status-occupied)] border border-[var(--brand-status-occupied)]/20 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60"
             >
               {callStaffLoading ? 'กำลังแจ้ง...' : callStaffSuccess ? 'เรียกแล้ว' : 'เรียกพนักงาน'}
             </button>
             <button
               onClick={() => setShowSummary(true)}
-              className="bg-pink-100 text-pink-800 px-4 py-2 rounded-full text-sm font-medium shadow-md"
+              className="bg-[var(--brand-status-bill-bg)] text-[var(--brand-status-bill)] border border-[var(--brand-status-bill)]/20 rounded-xl px-4 py-2 text-sm font-semibold transition-colors"
             >
               เช็คบิล
             </button>
