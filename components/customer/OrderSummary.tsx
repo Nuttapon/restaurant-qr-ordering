@@ -1,7 +1,20 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
+import { useOrderItemUpdates } from '@/lib/realtime/hooks'
+import { OrderItem } from '@/types/database'
+
+function OrderRealtimeListener({ orderId, onUpdate }: { orderId: string; onUpdate: (item: OrderItem) => void }) {
+  useOrderItemUpdates(orderId, onUpdate)
+  return null
+}
+
+function StatusBadge({ status }: { status: string }) {
+  if (status === 'done') return <span className="text-xs text-green-600 font-medium">✓ พร้อมแล้ว</span>
+  if (status === 'cooking') return <span className="text-xs text-yellow-500 font-medium animate-pulse">🍳 กำลังทำ</span>
+  return <span className="text-xs text-gray-400">รอ</span>
+}
 
 interface OrderItemDetail {
   id: string
@@ -37,6 +50,11 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
   const [orders, setOrders] = useState<OrderDetail[]>([])
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
+  const [itemStatuses, setItemStatuses] = useState<Record<string, string>>({})
+
+  const handleItemUpdate = useCallback((item: OrderItem) => {
+    setItemStatuses(prev => ({ ...prev, [item.id]: item.status }))
+  }, [])
 
   // Bill confirmation flow
   const [showBillConfirm, setShowBillConfirm] = useState(false)
@@ -135,9 +153,12 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
                 <div key={order.id} className="bg-[var(--brand-surface)] rounded-xl p-4">
                   <p className="text-xs text-gray-400 font-semibold uppercase mb-2">รอบที่ {order.round}</p>
                   {(order.order_items ?? []).map(item => (
-                    <div key={item.id} className="flex justify-between text-sm py-1">
-                      <span>{item.menu_item.name_th} × {item.quantity}</span>
-                      <span>{formatPrice(item.unit_price * item.quantity)}</span>
+                    <div key={item.id} className="py-1">
+                      <div className="flex justify-between text-sm">
+                        <span>{item.menu_item.name_th} × {item.quantity}</span>
+                        <span>{formatPrice(item.unit_price * item.quantity)}</span>
+                      </div>
+                      {item.note && <p className="text-xs text-gray-400 italic">{item.note}</p>}
                     </div>
                   ))}
                   <div className="flex justify-between text-sm font-medium pt-2 border-t mt-2 text-gray-600">
@@ -204,14 +225,23 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
             <p className="text-center text-gray-400 py-8">ยังไม่มีรายการ</p>
           )}
           {orders.map(order => (
+            <OrderRealtimeListener key={order.id} orderId={order.id} onUpdate={handleItemUpdate} />
+          ))}
+          {orders.map(order => (
             <div key={order.id}>
               <p className="text-xs text-gray-400 font-semibold uppercase mb-2">
                 รอบที่ {order.round}
               </p>
               {(order.order_items ?? []).map(item => (
                 <div key={item.id} className="flex justify-between text-sm py-1">
-                  <span>{item.menu_item.name_th} × {item.quantity}</span>
-                  <span>{formatPrice(item.unit_price * item.quantity)}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span>{item.menu_item.name_th} × {item.quantity}</span>
+                      <StatusBadge status={itemStatuses[item.id] ?? item.status} />
+                    </div>
+                    {item.note && <p className="text-xs text-gray-400 italic mt-0.5">{item.note}</p>}
+                  </div>
+                  <span className="ml-2">{formatPrice(item.unit_price * item.quantity)}</span>
                 </div>
               ))}
             </div>
