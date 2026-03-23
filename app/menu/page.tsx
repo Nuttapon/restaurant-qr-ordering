@@ -1,6 +1,8 @@
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { MenuPageClient } from './MenuPageClient'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   searchParams: Promise<{ token?: string }>
 }
@@ -28,6 +30,7 @@ export default async function MenuPage({ searchParams }: Props) {
   })
 
   if (error || !data) {
+    console.error('get_or_create_session failed:', error)
     return (
       <div className="min-h-screen flex items-center justify-center bg-orange-50">
         <div className="text-center p-8">

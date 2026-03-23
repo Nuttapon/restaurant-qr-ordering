@@ -11,9 +11,14 @@ export async function getSupabaseServerClient() {
       cookies: {
         getAll() { return cookieStore.getAll() },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          )
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // cookies().set() is not available in Server Components
+            // This is expected — cookies will be set by middleware instead
+          }
         },
       },
     }
