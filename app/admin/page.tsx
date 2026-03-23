@@ -11,6 +11,7 @@ export default async function AdminPage() {
       .from('notifications')
       .select('*')
       .eq('is_read', false)
+      .in('type', ['call_staff', 'bill_request'])
       .order('created_at', { ascending: false }),
   ])
 

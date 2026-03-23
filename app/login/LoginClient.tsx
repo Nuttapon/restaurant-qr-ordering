@@ -21,6 +21,7 @@ export function LoginClient() {
       setLoading(false)
       return
     }
+    setLoading(false)
     router.push('/admin')
   }
 

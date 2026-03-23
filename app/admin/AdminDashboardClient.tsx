@@ -51,14 +51,16 @@ export function AdminDashboardClient({ tables: initialTables, initialNotificatio
     if (unreadIds.length === 0) return
 
     const supabase = getSupabaseBrowserClient()
-    await supabase
+    const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
       .in('id', unreadIds)
 
-    setNotifications(prev =>
-      prev.map(n => (unreadIds.includes(n.id) ? { ...n, is_read: true } : n))
-    )
+    if (!error) {
+      setNotifications(prev =>
+        prev.map(n => (unreadIds.includes(n.id) ? { ...n, is_read: true } : n))
+      )
+    }
   }
 
   function handleTableClick(table: Table) {

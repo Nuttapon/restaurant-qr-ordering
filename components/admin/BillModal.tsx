@@ -119,6 +119,11 @@ export function BillModal({ table, onClose, onBillClosed }: Props) {
       .eq('id', table.id)
 
     if (tableError) {
+      // Roll back the session close to avoid a stuck state
+      await supabase
+        .from('sessions')
+        .update({ status: 'active', closed_by: null })
+        .eq('id', sessionId)
       setCloseError('ไม่สามารถอัปเดตสถานะโต๊ะได้ กรุณาลองใหม่')
       setClosing(false)
       return

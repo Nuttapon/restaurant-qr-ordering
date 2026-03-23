@@ -1,4 +1,3 @@
-'use client'
 import { Notification, Table } from '@/types/database'
 import { timeAgo } from '@/lib/utils'
 
