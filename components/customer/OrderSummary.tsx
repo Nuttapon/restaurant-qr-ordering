@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
 import { useOrderItemUpdates } from '@/lib/realtime/hooks'
@@ -89,6 +89,11 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
     ), 0
   )
 
+  const autoCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup timer on unmount
+  useEffect(() => () => { if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current) }, [])
+
   async function handleConfirmBill() {
     setBillSubmitting(true)
     setBillError(null)
@@ -100,6 +105,8 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
       })
       if (!res.ok) throw new Error('การส่งคำขอล้มเหลว กรุณาลองใหม่')
       setBillRequested(true)
+      // Auto-close after 2.5s so user sees success message, then returns to menu
+      autoCloseTimer.current = setTimeout(() => onClose(), 2500)
     } catch (err) {
       setBillError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด')
     } finally {
@@ -161,16 +168,18 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
             )}
 
             {billRequested ? (
-              <div className="bg-green-50 text-green-700 text-center p-3 rounded-xl font-medium">
-                แจ้งเรียบร้อยแล้ว พนักงานจะมาหาคุณในไม่ช้า
+              <div className="bg-green-50 text-green-700 text-center p-4 rounded-2xl font-bold text-lg flex flex-col items-center gap-2">
+                <span className="text-3xl">✅</span>
+                <span>แจ้งเรียบร้อยแล้ว!</span>
+                <span className="text-sm font-normal text-green-600">พนักงานจะมาหาคุณในไม่ช้า กำลังปิดหน้าต่างนี้...</span>
               </div>
             ) : (
               <button
                 onClick={handleConfirmBill}
                 disabled={billSubmitting}
-                className="w-full bg-red-500 text-white py-3 rounded-xl font-bold text-lg disabled:opacity-50 hover:bg-red-600 transition-colors"
+                className="w-full bg-status-bill text-white py-4 min-h-[56px] rounded-2xl font-black text-lg disabled:opacity-50 active:scale-[0.98] transition-all shadow-lg"
               >
-                {billSubmitting ? 'กำลังส่ง...' : 'ยืนยันขอเช็คบิล'}
+                {billSubmitting ? 'กำลังส่ง...' : '🧾 ยืนยันขอเช็คบิล'}
               </button>
             )}
           </div>
