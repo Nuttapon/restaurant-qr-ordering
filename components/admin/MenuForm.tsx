@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { MenuCategory, MenuItem } from '@/types/database'
@@ -31,14 +31,34 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Revoke blob URL on change/unmount to avoid memory leaks
+  useEffect(() => {
+    if (!imageFile) return
+    const url = URL.createObjectURL(imageFile)
+    setImagePreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [imageFile])
+
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  const MAX_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null
-    setImageFile(file)
     if (file) {
-      setImagePreview(URL.createObjectURL(file))
-    } else {
-      setImagePreview(item?.image_url ?? null)
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        setError('Only JPEG, PNG, WebP, or GIF images are allowed.')
+        e.target.value = ''
+        return
+      }
+      if (file.size > MAX_SIZE_BYTES) {
+        setError('Image must be smaller than 5 MB.')
+        e.target.value = ''
+        return
+      }
     }
+    setError(null)
+    setImageFile(file)
+    if (!file) setImagePreview(item?.image_url ?? null)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -126,6 +146,7 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
         savedItem = data as MenuItem
       }
 
+      setLoading(false)
       onSave(savedItem)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.')

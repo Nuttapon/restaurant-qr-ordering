@@ -39,6 +39,7 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
   // Menu item form state
   const [showItemForm, setShowItemForm] = useState(false)
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
+  const [itemError, setItemError] = useState<string | null>(null)
 
   const supabase = getSupabaseBrowserClient()
 
@@ -122,7 +123,9 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
       .select()
       .single()
 
-    if (!error && data) {
+    if (error) {
+      setCategoryError(error.message)
+    } else if (data) {
       setCategories(prev => prev.map(c => (c.id === cat.id ? (data as MenuCategory) : c)))
     }
   }
@@ -131,7 +134,9 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
     if (!confirm(`Delete category "${cat.name_th}"? This cannot be undone.`)) return
 
     const { error } = await supabase.from('menu_categories').delete().eq('id', cat.id)
-    if (!error) {
+    if (error) {
+      setCategoryError(error.message)
+    } else {
       setCategories(prev => prev.filter(c => c.id !== cat.id))
     }
   }
@@ -173,7 +178,9 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
       .select()
       .single()
 
-    if (!error && data) {
+    if (error) {
+      setItemError(error.message)
+    } else if (data) {
       setMenuItems(prev => prev.map(i => (i.id === item.id ? (data as MenuItem) : i)))
     }
   }
@@ -182,7 +189,9 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
     if (!confirm(`Delete item "${item.name_th}"? This cannot be undone.`)) return
 
     const { error } = await supabase.from('menu_items').delete().eq('id', item.id)
-    if (!error) {
+    if (error) {
+      setItemError(error.message)
+    } else {
       setMenuItems(prev => prev.filter(i => i.id !== item.id))
     }
   }
@@ -350,6 +359,10 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
       {/* ---- Menu Items Tab ---- */}
       {activeTab === 'items' && (
         <div>
+          {itemError && (
+            <p className="text-red-600 text-sm mb-3 bg-red-50 px-3 py-2 rounded-lg">{itemError}</p>
+          )}
+
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-gray-700">Menu Items</h2>
             {!showItemForm && (
@@ -378,7 +391,7 @@ export function MenuManagementClient({ categories: initialCategories, menuItems:
           {itemsByCategory.map(({ category, items }) => (
             <div key={category.id} className="mb-6">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-2 px-1">
-                {category.name_th} / {category.name_en}
+                {category.name_th}
               </h3>
               {items.length === 0 && (
                 <p className="text-gray-400 text-sm pl-1">No items in this category.</p>

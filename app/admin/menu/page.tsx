@@ -6,10 +6,14 @@ import { MenuManagementClient } from './MenuManagementClient'
 export default async function AdminMenuPage() {
   const supabase = await getSupabaseServerClient()
 
-  const [{ data: categories }, { data: menuItems }] = await Promise.all([
+  const [{ data: categories, error: catError }, { data: menuItems, error: itemError }] = await Promise.all([
     supabase.from('menu_categories').select('*').order('sort_order'),
     supabase.from('menu_items').select('*').order('sort_order'),
   ])
+
+  if (catError || itemError) {
+    throw new Error(catError?.message ?? itemError?.message)
+  }
 
   return (
     <div>
