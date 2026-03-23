@@ -1,19 +1,24 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCartStore } from '@/store/cart'
 import { formatPrice } from '@/lib/utils'
 
 interface Props {
   sessionId: string
   tableId: string
-  onOrderPlaced: (orderId: string) => void
+  onOrderPlaced: (orderId: string, round: number) => void
 }
 
 export function CartDrawer({ sessionId, tableId, onOrderPlaced }: Props) {
-  const { items, updateQuantity, updateNote, clearCart, totalPrice } = useCartStore()
+  const { items, updateQuantity, updateNote, setSessionId, clearCart, totalPrice } = useCartStore()
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Feature 5: sync sessionId to clear stale cart on new session
+  useEffect(() => {
+    setSessionId(sessionId)
+  }, [sessionId, setSessionId])
 
   const total = totalPrice()
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0)
@@ -40,10 +45,10 @@ export function CartDrawer({ sessionId, tableId, onOrderPlaced }: Props) {
         const data = await res.json()
         throw new Error(data.error ?? 'ส่งออเดอร์ไม่สำเร็จ')
       }
-      const { orderId } = await res.json()
+      const { orderId, round } = await res.json()
       clearCart()
       setOpen(false)
-      onOrderPlaced(orderId)
+      onOrderPlaced(orderId, round)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด กรุณาลองใหม่')
     } finally {

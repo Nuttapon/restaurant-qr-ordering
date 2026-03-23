@@ -23,6 +23,9 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
   const [price, setPrice] = useState(item?.price?.toString() ?? '')
   const [sortOrder, setSortOrder] = useState(item?.sort_order?.toString() ?? '0')
   const [isAvailable, setIsAvailable] = useState(item?.is_available ?? true)
+  const [isSpicy, setIsSpicy] = useState(item?.is_spicy ?? false)
+  const [isVegetarian, setIsVegetarian] = useState(item?.is_vegetarian ?? false)
+  const [isRecommended, setIsRecommended] = useState(item?.is_recommended ?? false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(item?.image_url ?? null)
 
@@ -113,6 +116,9 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
         price: parsedPrice,
         sort_order: parseInt(sortOrder) || 0,
         is_available: isAvailable,
+        is_spicy: isSpicy,
+        is_vegetarian: isVegetarian,
+        is_recommended: isRecommended,
         image_url: imageUrl,
       }
 
@@ -254,17 +260,23 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
           />
         </div>
 
-        {/* is_available */}
-        <div className="flex items-center gap-2 sm:col-span-2">
-          <input
-            id="is_available"
-            type="checkbox"
-            checked={isAvailable}
-            onChange={e => setIsAvailable(e.target.checked)}
-            className="w-4 h-4 accent-[var(--brand-primary)] rounded"
-          />
-          <label htmlFor="is_available" className="text-sm font-medium text-gray-600">
-            Available for ordering
+        {/* Toggles */}
+        <div className="sm:col-span-2 flex flex-wrap gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={isAvailable} onChange={e => setIsAvailable(e.target.checked)} className="w-4 h-4 accent-[var(--brand-primary)] rounded" />
+            <span className="text-sm font-medium text-gray-600">Available</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={isRecommended} onChange={e => setIsRecommended(e.target.checked)} className="w-4 h-4 accent-yellow-500 rounded" />
+            <span className="text-sm font-medium text-gray-600">⭐ แนะนำ</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={isSpicy} onChange={e => setIsSpicy(e.target.checked)} className="w-4 h-4 accent-red-500 rounded" />
+            <span className="text-sm font-medium text-gray-600">🌶 เผ็ด</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={isVegetarian} onChange={e => setIsVegetarian(e.target.checked)} className="w-4 h-4 accent-green-500 rounded" />
+            <span className="text-sm font-medium text-gray-600">🥦 มังสวิรัติ</span>
           </label>
         </div>
 
