@@ -25,12 +25,12 @@ export function OrderCard({ order }: { order: OrderWithItems }) {
   const doneCount = items.filter(i => i.status === 'done').length
 
   const urgencyBorder = allDone
-    ? 'border-green-500/50'
+    ? 'border-green-500/30 bg-kitchen-card/50'
     : elapsedMin >= 10
-      ? 'border-red-500'
+      ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)] ring-1 ring-red-500'
       : elapsedMin >= 5
-        ? 'border-yellow-400'
-        : 'border-[var(--brand-kitchen-border)]'
+        ? 'border-yellow-500/80 ring-1 ring-yellow-500/50'
+        : 'border-kitchen-border'
 
   async function handleMarkDone(itemId: string) {
     try {
@@ -50,57 +50,70 @@ export function OrderCard({ order }: { order: OrderWithItems }) {
   return (
     <div
       className={cn(
-        'rounded-xl border-2 p-4 bg-[var(--brand-kitchen-card)] flex flex-col gap-3',
-        allDone ? 'opacity-50' : '',
+        'rounded-2xl border-2 p-5 bg-kitchen-card flex flex-col gap-4 shadow-lg transition-all',
+        allDone ? 'opacity-60 scale-[0.98]' : 'hover:shadow-xl',
         urgencyBorder
       )}
     >
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2">
-          <span className="text-white font-bold text-lg">โต๊ะ {order.tables.number}</span>
-          <span className="text-slate-400 text-sm">รอบ {order.round}</span>
-          <span className="text-slate-500 text-xs">#{order.id.slice(-4)}</span>
+      <div className="flex items-start justify-between gap-3 pb-3 border-b border-white/5">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <span className="text-white font-black text-2xl tracking-tight leading-none">โต๊ะ {order.tables.number}</span>
+            <span className="bg-white/10 text-white font-bold px-2 py-0.5 rounded text-sm">รอบ {order.round}</span>
+          </div>
+          <span className="text-slate-500 text-xs font-mono uppercase tracking-widest mt-1">#{order.id.slice(0,8)}</span>
         </div>
         <TimerBadge createdAt={order.created_at} />
       </div>
 
       {!allDone && items.length > 1 && (
-        <div className="flex items-center gap-2">
-          <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden border border-slate-700">
             <div
-              className="h-full rounded-full bg-green-500 transition-all duration-300"
+              className="h-full rounded-full bg-green-500 transition-all duration-500 ease-out"
               style={{ width: `${(doneCount / items.length) * 100}%` }}
             />
           </div>
-          <span className="text-xs text-[var(--brand-text-muted)]">{doneCount}/{items.length}</span>
+          <span className="text-sm font-bold text-slate-400 min-w-[30px] text-right">{doneCount}/{items.length}</span>
         </div>
       )}
 
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-3 mt-1">
         {items.map(item => (
-          <li key={item.id} className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
+          <li 
+            key={item.id} 
+            className={cn(
+              "flex items-center justify-between gap-3 p-3 rounded-xl transition-colors",
+              item.status === 'done' ? 'bg-white/5' : 'bg-slate-800/50 hover:bg-slate-800'
+            )}
+          >
+            <div className="flex-1 min-w-0 pr-2">
               <p
                 className={cn(
-                  'text-sm font-medium',
-                  item.status === 'done' ? 'line-through text-slate-500' : 'text-white'
+                  'text-lg font-bold leading-tight',
+                  item.status === 'done' ? 'line-through text-slate-500' : 'text-slate-100'
                 )}
               >
-                {item.menu_items.name_th} × {item.quantity}
+                {item.menu_items.name_th} <span className="text-primary ml-1 text-xl">× {item.quantity}</span>
               </p>
               {item.note && (
-                <p className="text-xs text-yellow-300 mt-0.5">หมายเหตุ: {item.note}</p>
+                <div className="mt-1.5 flex items-start gap-1">
+                  <span className="text-yellow-500 text-xs mt-0.5">⚠️</span>
+                  <p className="text-sm text-yellow-400 font-medium pb-0.5">{item.note}</p>
+                </div>
               )}
             </div>
             {item.status !== 'done' ? (
               <button
                 onClick={() => handleMarkDone(item.id)}
-                className="flex-shrink-0 text-xs bg-green-600 hover:bg-green-500 text-white px-2 py-1 rounded-lg font-semibold transition-colors"
+                className="shrink-0 flex items-center justify-center min-w-[80px] min-h-[50px] bg-green-600 hover:bg-green-500 active:scale-95 text-white px-4 rounded-xl font-bold shadow-md transition-all cursor-pointer border-b-4 border-green-700 hover:border-green-600 active:border-t-4 active:border-b-0"
               >
-                ✓ Done
+                <span className="text-lg">✓ Done</span>
               </button>
             ) : (
-              <span className="flex-shrink-0 text-xs text-green-400 font-semibold">✓ Done</span>
+              <span className="shrink-0 flex items-center justify-center min-w-[80px] min-h-[50px] text-green-500 font-bold opacity-70">
+                <span className="text-xl">✓ เสร็จ</span>
+              </span>
             )}
           </li>
         ))}

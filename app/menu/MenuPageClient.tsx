@@ -52,31 +52,32 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
   }
 
   return (
-    <div className="min-h-screen bg-[var(--brand-surface)]">
+    <div className="min-h-screen bg-surface pb-32">
       {/* Order confirmation toast */}
       {orderToast !== null && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-5 py-3 rounded-2xl shadow-lg font-semibold text-sm animate-slide-up pointer-events-none">
-          สั่งอาหารแล้ว รอบที่ {orderToast} 🎉
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-4 rounded-full shadow-2xl font-bold text-md animate-slide-up pointer-events-none flex items-center gap-3">
+          <span className="text-xl">🎉</span>
+          สั่งอาหารแล้ว รอบที่ {orderToast}
         </div>
       )}
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#D4622B] to-[#C7522A] shadow-md text-white px-4 py-3 flex justify-between items-center sticky top-0 z-30">
-        <h1 className="font-bold text-lg">เมนู</h1>
-        <span className="text-sm bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full font-medium">โต๊ะ {table.number}</span>
+      <div className="bg-primary shadow-sm text-white px-5 py-4 flex justify-between items-center sticky top-0 z-30 transition-all rounded-b-[24px]">
+        <h1 className="font-black text-2xl tracking-tight">เมนูอาหาร</h1>
+        <span className="text-sm bg-white/20 backdrop-blur-md text-white px-4 py-1.5 rounded-full font-bold shadow-inner">โต๊ะ {table.number}</span>
       </div>
 
       {/* Search + Category tabs */}
-      <div className="px-4 pt-3 pb-2 bg-white shadow-[var(--brand-shadow-sm)] sticky top-14 z-20">
-        {/* Feature 3: Search bar */}
-        <div className="relative mb-2">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">🔍</span>
+      <div className="px-5 pt-4 pb-2 bg-surface/80 backdrop-blur-xl sticky top-[68px] z-20 transition-all">
+        {/* Search bar */}
+        <div className="relative mb-2 shadow-sm rounded-2xl">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">🔍</span>
           <input
             type="search"
             placeholder="ค้นหาเมนู..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[var(--brand-surface)] rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/30"
+            className="w-full bg-white border border-slate-200 rounded-2xl pl-11 pr-5 py-3.5 text-md focus:outline-none focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all font-medium text-slate-800 placeholder:text-slate-400 shadow-sm"
           />
         </div>
         <CategoryTabs
@@ -87,9 +88,12 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
       </div>
 
       {/* Menu items */}
-      <div className="px-4 py-3 space-y-3 pb-48">
+      <div className="px-5 py-4 space-y-4">
         {filtered.length === 0 && (
-          <p className="text-center text-gray-400 py-12">ไม่พบเมนูที่ค้นหา</p>
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300 mx-2">
+            <span className="text-4xl block mb-4 opacity-50">🍽️</span>
+            <p className="text-slate-500 font-medium">ไม่พบเมนูที่ค้นหา</p>
+          </div>
         )}
         {filtered.map(item => (
           <MenuItemCard key={item.id} item={item} />
@@ -98,25 +102,25 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
 
       {/* Post-order action buttons */}
       {placedOrderIds.length > 0 && (
-        <div className="fixed bottom-24 left-0 right-0 flex flex-col items-center gap-1 z-40">
+        <div className="fixed bottom-24 left-0 right-0 flex flex-col items-center gap-2 z-30 animate-fade-in pointer-events-none">
           {callStaffError && (
-            <span className="bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full shadow">
+            <span className="bg-red-100 text-red-700 text-sm font-bold px-4 py-2 rounded-full shadow-lg border border-red-200 pointer-events-auto">
               {callStaffError}
             </span>
           )}
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl px-4 py-3 shadow-[var(--brand-shadow-lg)] mx-4 flex gap-2">
+          <div className="bg-white/90 backdrop-blur-xl rounded-[28px] p-2 shadow-2xl mx-4 flex gap-2 border border-slate-200/50 pointer-events-auto">
             <button
               onClick={callStaff}
               disabled={callStaffLoading || callStaffSuccess}
-              className="bg-[var(--brand-status-occupied-bg)] text-[var(--brand-status-occupied)] border border-[var(--brand-status-occupied)]/20 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60"
+              className="bg-status-occupied-bg text-status-occupied border border-status-occupied/20 rounded-[20px] px-5 py-3.5 text-md font-bold transition-all disabled:opacity-60 active:scale-95 shadow-sm hover:shadow-md flex-1"
             >
-              {callStaffLoading ? 'กำลังแจ้ง...' : callStaffSuccess ? 'เรียกแล้ว' : 'เรียกพนักงาน'}
+              {callStaffLoading ? 'กำลังแจ้ง...' : callStaffSuccess ? 'เรียกแล้ว ✓' : '🙋‍♂️ เรียกพนักงาน'}
             </button>
             <button
               onClick={() => setShowSummary(true)}
-              className="bg-[var(--brand-status-bill-bg)] text-[var(--brand-status-bill)] border border-[var(--brand-status-bill)]/20 rounded-xl px-4 py-2 text-sm font-semibold transition-colors"
+              className="bg-status-bill-bg text-status-bill border border-status-bill/20 rounded-[20px] px-5 py-3.5 text-md font-bold transition-all active:scale-95 shadow-sm hover:shadow-md flex-1"
             >
-              เช็คบิล
+              🧾 เช็คบิล
             </button>
           </div>
         </div>

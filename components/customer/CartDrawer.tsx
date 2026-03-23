@@ -63,77 +63,85 @@ export function CartDrawer({ sessionId, tableId, onOrderPlaced }: Props) {
       {/* Floating cart button */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[var(--brand-primary)] text-white px-6 py-3.5 rounded-2xl shadow-lg flex items-center gap-3 z-40 transition-colors"
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-primary text-white px-8 py-4 rounded-full shadow-lg shadow-primary/30 flex items-center gap-4 z-40 transition-all hover:scale-105 active:scale-95 animate-pop min-h-[56px]"
       >
-        <span className="bg-white text-[var(--brand-primary)] text-xs font-bold rounded-full px-1.5 flex items-center justify-center">
+        <span className="bg-white text-primary text-sm font-black rounded-full min-w-[28px] h-7 px-2 flex items-center justify-center shadow-sm">
           {itemCount}
         </span>
-        <span className="font-semibold">ดูตะกร้า</span>
-        <span className="font-bold">{formatPrice(total)}</span>
+        <span className="font-bold text-lg leading-none">ดูตะกร้า</span>
+        <span className="font-black text-lg leading-none bg-white/20 px-3 py-1 rounded-full">{formatPrice(total)}</span>
       </button>
 
       {/* Drawer backdrop */}
       {open && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div
-            className="absolute inset-0 bg-black/50 animate-fade-in"
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
             onClick={() => setOpen(false)}
           />
-          <div className="relative bg-[var(--brand-surface-card)] rounded-t-3xl max-h-[80vh] flex flex-col animate-slide-up">
-            <div className="w-10 h-1 rounded-full bg-[var(--brand-text-muted)]/30 mx-auto pt-3 mb-1" />
-            <div className="p-4 border-b flex justify-between items-center">
-              <h2 className="text-lg font-bold text-[var(--brand-text-primary)]">รายการสั่ง</h2>
-              <button onClick={() => setOpen(false)} className="text-gray-400 text-2xl leading-none">✕</button>
+          <div className="relative bg-surface-card rounded-t-[32px] max-h-[85vh] flex flex-col animate-slide-up shadow-2xl">
+            <div className="w-12 h-1.5 rounded-full bg-slate-200 mx-auto mt-4 mb-2" />
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+              <h2 className="text-2xl font-black text-slate-800">รายการสั่งอาหาร</h2>
+              <button 
+                onClick={() => setOpen(false)} 
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 active:scale-95 transition-all"
+                aria-label="ปิด"
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="overflow-y-auto flex-1 p-4 space-y-3">
+            <div className="overflow-y-auto flex-1 p-6 space-y-5">
               {items.map(({ menuItem, quantity, note }) => (
-                <div key={menuItem.id}>
-                  <div className="flex items-center gap-3">
+                <div key={menuItem.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative group">
+                  <div className="flex items-start gap-4">
                     <div className="flex-1">
-                      <p className="font-medium text-sm">{menuItem.name_th}</p>
-                      <p className="text-[var(--brand-primary)] text-sm">{formatPrice(menuItem.price)}</p>
+                      <p className="font-bold text-slate-800 text-lg leading-snug">{menuItem.name_th}</p>
+                      <p className="text-primary font-black mt-1 text-lg">{formatPrice(menuItem.price)}</p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3 bg-slate-50 rounded-2xl p-1 border border-slate-100 mt-1">
                       <button
                         onClick={() => updateQuantity(menuItem.id, quantity - 1)}
-                        className="w-8 h-8 rounded-full bg-[var(--brand-primary-light)] text-[var(--brand-primary)] font-bold text-lg flex items-center justify-center"
+                        className="w-10 h-10 rounded-xl bg-white text-primary font-black text-xl flex items-center justify-center hover:bg-slate-100 shadow-sm border border-slate-200 active:scale-95 transition-all cursor-pointer"
+                        aria-label="ลด"
                       >−</button>
-                      <span className="w-6 text-center font-bold">{quantity}</span>
+                      <span className="w-8 text-center font-bold text-lg text-slate-800">{quantity}</span>
                       <button
                         onClick={() => updateQuantity(menuItem.id, quantity + 1)}
-                        className="w-8 h-8 rounded-full bg-[var(--brand-primary)] text-white font-bold text-lg flex items-center justify-center"
+                        className="w-10 h-10 rounded-xl bg-primary text-white font-black text-xl flex items-center justify-center hover:bg-primary-hover shadow-md shadow-primary/20 active:scale-95 transition-all cursor-pointer"
+                        aria-label="เพิ่ม"
                       >+</button>
                     </div>
                   </div>
                   <input
                     type="text"
-                    placeholder="หมายเหตุ เช่น ไม่เผ็ด"
+                    placeholder="📝 หมายเหตุ (เช่น ขอไม่เผ็ด, ไม่ใส่ผักชี)"
                     value={note ?? ''}
                     onChange={(e) => updateNote(menuItem.id, e.target.value)}
-                    className="w-full mt-1 text-xs text-gray-500 border-b border-gray-200 bg-transparent outline-none placeholder-gray-300 py-0.5"
+                    className="w-full mt-4 text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
               ))}
             </div>
 
-            <div className="p-4 border-t space-y-3">
+            <div className="p-6 border-t border-slate-100 bg-white/50 backdrop-blur-md space-y-4 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
               {error && (
-                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg flex justify-between">
-                  <span>{error}</span>
-                  <button onClick={handleSubmit} className="underline ml-2">ลองใหม่</button>
+                <div className="bg-red-50 text-red-600 font-medium text-sm p-4 rounded-2xl flex justify-between items-center shadow-sm border border-red-100">
+                  <span>⚠️ {error}</span>
+                  <button onClick={handleSubmit} className="underline font-bold active:opacity-70 whitespace-nowrap ml-4">ลองใหม่</button>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-lg">
-                <span>รวม</span>
-                <span className="text-[var(--brand-primary)]">{formatPrice(total)}</span>
+              <div className="flex justify-between items-center font-black text-2xl px-2">
+                <span className="text-slate-800">ยอดรวม</span>
+                <span className="text-primary">{formatPrice(total)}</span>
               </div>
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full bg-[var(--brand-primary)] text-white py-3 rounded-xl font-bold text-lg disabled:opacity-50 hover:bg-[var(--brand-primary-hover)] transition-colors"
+                className="w-full bg-primary text-white py-4 min-h-[60px] rounded-2xl font-black text-xl disabled:opacity-50 hover:bg-primary-hover active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xl shadow-primary/30"
               >
-                {submitting ? 'กำลังส่ง...' : 'สั่งอาหาร ✓'}
+                {submitting ? 'กำลังส่งออเดอร์...' : 'ยืนยันสั่งอาหาร ✓'}
               </button>
             </div>
           </div>
