@@ -14,9 +14,9 @@ const STATUS_LABELS: Record<Table['status'], string> = {
 }
 
 const STATUS_COLORS: Record<Table['status'], string> = {
-  available: 'bg-green-100 border-green-300 text-green-800',
-  occupied: 'bg-yellow-100 border-yellow-300 text-yellow-800',
-  bill_requested: 'bg-pink-100 border-pink-400 text-pink-800',
+  available: 'bg-[var(--brand-status-available-bg)] border-[var(--brand-status-available)]/30 text-[var(--brand-status-available)]',
+  occupied: 'bg-[var(--brand-status-occupied-bg)] border-[var(--brand-status-occupied)]/30 text-[var(--brand-status-occupied)]',
+  bill_requested: 'bg-[var(--brand-status-bill-bg)] border-[var(--brand-status-bill)]/30 text-[var(--brand-status-bill)]',
 }
 
 export function TableGrid({ tables, notifications, onTableClick }: Props) {
@@ -28,7 +28,7 @@ export function TableGrid({ tables, notifications, onTableClick }: Props) {
   }, {})
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
       {tables.map(table => {
         const alerts = unreadByTable[table.id] ?? []
         const hasAlert = alerts.length > 0
@@ -38,15 +38,15 @@ export function TableGrid({ tables, notifications, onTableClick }: Props) {
             key={table.id}
             onClick={() => onTableClick(table)}
             className={cn(
-              'relative rounded-xl border-2 p-4 text-left transition-transform active:scale-95 hover:shadow-md',
+              'relative rounded-xl border-2 p-4 text-left transition-transform active:scale-95 hover:shadow-md hover:shadow-[var(--brand-shadow-md)]',
               STATUS_COLORS[table.status]
             )}
           >
             <div className="text-3xl font-extrabold">{table.number}</div>
-            <div className="text-sm mt-1 font-medium">{STATUS_LABELS[table.status]}</div>
+            <div className="text-xs mt-1.5 font-semibold uppercase tracking-wide">{STATUS_LABELS[table.status]}</div>
 
             {hasAlert && (
-              <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold">
+              <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--brand-status-bill)] text-white text-xs font-bold">
                 {alerts.length}
               </span>
             )}

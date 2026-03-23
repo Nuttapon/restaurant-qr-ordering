@@ -134,9 +134,9 @@ export function BillModal({ table, onClose, onBillClosed }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90vh]">
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col max-h-[90vh] animate-scale-in">
         {/* Header */}
         <div className="p-4 border-b flex justify-between items-center">
           <h2 className="text-lg font-bold">บิลโต๊ะ {table.number}</h2>
@@ -148,7 +148,11 @@ export function BillModal({ table, onClose, onBillClosed }: Props) {
         {/* Body */}
         <div className="overflow-y-auto flex-1 p-4 space-y-4">
           {loading && (
-            <p className="text-center text-gray-400 py-8">กำลังโหลด...</p>
+            <div className="space-y-3 py-4">
+              <div className="h-4 rounded bg-[var(--brand-text-muted)]/20 animate-pulse w-3/4" />
+              <div className="h-4 rounded bg-[var(--brand-text-muted)]/20 animate-pulse w-1/2" />
+              <div className="h-4 rounded bg-[var(--brand-text-muted)]/20 animate-pulse w-2/3" />
+            </div>
           )}
           {fetchError && (
             <p className="text-center text-red-500 py-8">{fetchError}</p>
@@ -162,8 +166,8 @@ export function BillModal({ table, onClose, onBillClosed }: Props) {
               0
             )
             return (
-              <div key={order.id} className="border rounded-xl p-3">
-                <p className="text-xs text-gray-400 font-semibold uppercase mb-2">
+              <div key={order.id} className="bg-[var(--brand-surface)] rounded-xl p-4">
+                <p className="text-xs text-[var(--brand-text-muted)] font-semibold uppercase mb-2">
                   รอบที่ {order.round}
                 </p>
                 {(order.order_items ?? []).map(item => (
@@ -188,7 +192,7 @@ export function BillModal({ table, onClose, onBillClosed }: Props) {
         <div className="p-4 border-t space-y-3">
           <div className="flex justify-between font-bold text-xl">
             <span>รวมทั้งหมด</span>
-            <span className="text-orange-500">{formatPrice(total)}</span>
+            <span className="text-[var(--brand-primary)]">{formatPrice(total)}</span>
           </div>
 
           {closeError && (
@@ -198,7 +202,7 @@ export function BillModal({ table, onClose, onBillClosed }: Props) {
           <button
             onClick={handleCloseBill}
             disabled={closing || loading || !!fetchError || !sessionId}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white py-3 rounded-xl font-bold text-lg transition-colors"
+            className="w-full bg-[var(--brand-status-available)] hover:bg-[var(--brand-status-available)]/80 disabled:bg-gray-300 text-white py-3 rounded-xl font-bold text-lg transition-colors"
           >
             {closing ? 'กำลังปิดบิล...' : 'ปิดบิล (Close Bill)'}
           </button>
