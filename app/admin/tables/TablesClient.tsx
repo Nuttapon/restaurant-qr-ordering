@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { QRCodeCanvas } from 'qrcode.react'
 import { nanoid } from 'nanoid'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
@@ -14,15 +14,12 @@ interface QRModalProps {
 }
 
 function QRModal({ table, baseUrl, onClose }: QRModalProps) {
-  const url = `${baseUrl}/menu?token=${table.qr_token}`
-  const canvasId = `qr-canvas-${table.id}`
+  const url = `${baseUrl}/menu?token=${table.qr_token ?? ''}`
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   function handleDownload() {
-    const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null
-    if (!canvas) {
-      alert('QR canvas not found')
-      return
-    }
+    const canvas = canvasRef.current
+    if (!canvas) return
     const dataUrl = canvas.toDataURL('image/png')
     const a = document.createElement('a')
     a.href = dataUrl
@@ -50,7 +47,7 @@ function QRModal({ table, baseUrl, onClose }: QRModalProps) {
           </button>
         </div>
 
-        <QRCodeCanvas value={url} size={256} id={canvasId} />
+        <QRCodeCanvas value={url} size={256} ref={canvasRef} />
 
         <div className="w-full">
           <p className="text-xs text-gray-500 mb-1">Customer URL</p>
@@ -84,6 +81,11 @@ export function TablesClient({ tables: initialTables }: Props) {
   const [tables, setTables] = useState<Table[]>(initialTables)
   const [selectedTable, setSelectedTable] = useState<Table | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [baseUrl, setBaseUrl] = useState('')
+
+  useEffect(() => {
+    setBaseUrl(window.location.origin)
+  }, [])
 
   async function handleAddTable() {
     const input = window.prompt('Enter table number:')
@@ -112,8 +114,6 @@ export function TablesClient({ tables: initialTables }: Props) {
     setError(null)
     setTables(prev => [...prev, data as Table].sort((a, b) => a.number - b.number))
   }
-
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
 
   return (
     <div>
@@ -169,7 +169,7 @@ export function TablesClient({ tables: initialTables }: Props) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-gray-400 font-mono text-xs hidden sm:table-cell">
-                    {table.qr_token.slice(0, 10)}…
+                    {table.qr_token ? `${table.qr_token.slice(0, 10)}…` : '—'}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
