@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseServerClient } from '@/lib/supabase/server'
+import { getSupabaseServiceClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
-  const supabase = await getSupabaseServerClient()
+  const supabase = getSupabaseServiceClient()
   const { sessionId, tableId, type } = await request.json()
 
   if (!sessionId || !tableId || !['call_staff', 'bill_request'].includes(type)) {
