@@ -89,7 +89,8 @@ export function MenuForm({ categories, item, onSave, onCancel }: Props) {
       let imageUrl: string | null = item?.image_url ?? null
 
       if (imageFile) {
-        const path = `menu-items/${Date.now()}-${imageFile.name}`
+        const ext = imageFile.name.split('.').pop() ?? 'jpg'
+        const path = `menu-items/${Date.now()}.${ext}`
         const { error: uploadError } = await supabase.storage
           .from('menu-images')
           .upload(path, imageFile, { upsert: true })
