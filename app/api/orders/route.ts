@@ -86,5 +86,5 @@ export async function POST(request: NextRequest) {
     .from('notifications')
     .insert({ table_id: tableId, type: 'new_order', order_id: order.id })
 
-  return NextResponse.json({ orderId: order.id })
+  return NextResponse.json({ orderId: order.id, round: order.round })
 }

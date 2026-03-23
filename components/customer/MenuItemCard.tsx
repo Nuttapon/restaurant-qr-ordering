@@ -34,7 +34,12 @@ export function MenuItemCard({ item }: Props) {
         {item.description_th && (
           <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{item.description_th}</p>
         )}
-        <p className="text-[var(--brand-primary)] font-bold text-lg mt-1">{formatPrice(item.price)}</p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-[var(--brand-primary)] font-bold text-lg">{formatPrice(item.price)}</p>
+          {item.is_recommended && <span className="text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full">⭐ แนะนำ</span>}
+          {item.is_spicy && <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">🌶 เผ็ด</span>}
+          {item.is_vegetarian && <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">🥦 มังสวิรัติ</span>}
+        </div>
       </div>
       {inCart ? (
         <div className="self-center flex items-center gap-1">

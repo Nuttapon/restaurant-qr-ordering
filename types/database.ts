@@ -41,6 +41,9 @@ export interface MenuItem {
   price: number
   image_url: string | null
   is_available: boolean
+  is_spicy: boolean
+  is_vegetarian: boolean
+  is_recommended: boolean
   sort_order: number
   updated_at: string
 }

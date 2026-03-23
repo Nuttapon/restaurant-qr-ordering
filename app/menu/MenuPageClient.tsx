@@ -5,6 +5,7 @@ import { CategoryTabs } from '@/components/customer/CategoryTabs'
 import { MenuItemCard } from '@/components/customer/MenuItemCard'
 import { CartDrawer } from '@/components/customer/CartDrawer'
 import { OrderSummary } from '@/components/customer/OrderSummary'
+import { useSoundAlert } from '@/components/shared/SoundAlert'
 
 interface Props {
   session: Session
@@ -15,8 +16,10 @@ interface Props {
 
 export function MenuPageClient({ session, table, categories, menuItems }: Props) {
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const [placedOrderIds, setPlacedOrderIds] = useState<string[]>([])
   const [showSummary, setShowSummary] = useState(false)
+  const [orderToast, setOrderToast] = useState<number | null>(null) // stores round number
 
   const [callStaffLoading, setCallStaffLoading] = useState(false)
   const [callStaffSuccess, setCallStaffSuccess] = useState(false)
@@ -24,21 +27,34 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
 
   const callStaffSuccessTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const callStaffErrorTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const orderToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Fix M5: Clean up timeouts on unmount
+  const { playDing } = useSoundAlert()
+
   useEffect(() => {
     return () => {
       if (callStaffSuccessTimer.current) clearTimeout(callStaffSuccessTimer.current)
       if (callStaffErrorTimer.current) clearTimeout(callStaffErrorTimer.current)
+      if (orderToastTimer.current) clearTimeout(orderToastTimer.current)
     }
   }, [])
 
-  const filtered = activeCategoryId
-    ? menuItems.filter(i => i.category_id === activeCategoryId)
-    : menuItems
+  const filtered = menuItems.filter(item => {
+    const matchesCategory = activeCategoryId ? item.category_id === activeCategoryId : true
+    const q = searchQuery.trim().toLowerCase()
+    const matchesSearch = q
+      ? item.name_th.toLowerCase().includes(q) || item.name_en.toLowerCase().includes(q)
+      : true
+    return matchesCategory && matchesSearch
+  })
 
-  function handleOrderPlaced(orderId: string) {
+  function handleOrderPlaced(orderId: string, round: number) {
     setPlacedOrderIds(prev => [...prev, orderId])
+    // Feature 6: sound + toast
+    playDing()
+    setOrderToast(round)
+    if (orderToastTimer.current) clearTimeout(orderToastTimer.current)
+    orderToastTimer.current = setTimeout(() => setOrderToast(null), 3500)
   }
 
   async function handleCallStaff() {
@@ -65,14 +81,32 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
 
   return (
     <div className="min-h-screen bg-[var(--brand-surface)]">
+      {/* Order confirmation toast */}
+      {orderToast !== null && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-5 py-3 rounded-2xl shadow-lg font-semibold text-sm animate-slide-up pointer-events-none">
+          สั่งอาหารแล้ว รอบที่ {orderToast} 🎉
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-gradient-to-r from-[#D4622B] to-[#C7522A] shadow-md text-white px-4 py-3 flex justify-between items-center sticky top-0 z-30">
         <h1 className="font-bold text-lg">เมนู</h1>
         <span className="text-sm bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full font-medium">โต๊ะ {table.number}</span>
       </div>
 
-      {/* Category tabs */}
-      <div className="px-4 py-3 bg-white shadow-[var(--brand-shadow-sm)] sticky top-14 z-20">
+      {/* Search + Category tabs */}
+      <div className="px-4 pt-3 pb-2 bg-white shadow-[var(--brand-shadow-sm)] sticky top-14 z-20">
+        {/* Feature 3: Search bar */}
+        <div className="relative mb-2">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">🔍</span>
+          <input
+            type="search"
+            placeholder="ค้นหาเมนู..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-[var(--brand-surface)] rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/30"
+          />
+        </div>
         <CategoryTabs
           categories={categories}
           activeId={activeCategoryId}
@@ -82,6 +116,9 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
 
       {/* Menu items */}
       <div className="px-4 py-3 space-y-3 pb-48">
+        {filtered.length === 0 && (
+          <p className="text-center text-gray-400 py-12">ไม่พบเมนูที่ค้นหา</p>
+        )}
         {filtered.map(item => (
           <MenuItemCard key={item.id} item={item} />
         ))}
