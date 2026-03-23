@@ -1,7 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Order, OrderItem, MenuItem } from '@/types/database'
-import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { TimerBadge } from './TimerBadge'
 import { cn } from '@/lib/utils'
 
@@ -12,11 +11,19 @@ export type OrderWithItems = Order & {
 
 export function OrderCard({ order }: { order: OrderWithItems }) {
   const [items, setItems] = useState(order.order_items)
+  const [elapsedMin, setElapsedMin] = useState(0)
+
+  useEffect(() => {
+    const start = new Date(order.created_at).getTime()
+    const update = () => setElapsedMin(Math.floor(Math.max(0, Date.now() - start) / 60000))
+    update()
+    const interval = setInterval(update, 60000)
+    return () => clearInterval(interval)
+  }, [order.created_at])
 
   const allDone = items.length > 0 && items.every(i => i.status === 'done')
   const doneCount = items.filter(i => i.status === 'done').length
 
-  const elapsedMin = Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000)
   const urgencyBorder = allDone
     ? 'border-green-500/50'
     : elapsedMin >= 10
@@ -26,15 +33,17 @@ export function OrderCard({ order }: { order: OrderWithItems }) {
         : 'border-[var(--brand-kitchen-border)]'
 
   async function handleMarkDone(itemId: string) {
-    const supabase = getSupabaseBrowserClient()
-    const { error } = await supabase
-      .from('order_items')
-      .update({ status: 'done' })
-      .eq('id', itemId)
-    if (!error) {
-      setItems(prev =>
-        prev.map(i => (i.id === itemId ? { ...i, status: 'done' as const } : i))
-      )
+    try {
+      const res = await fetch(`/api/kitchen/order-items/${itemId}`, {
+        method: 'PATCH'
+      })
+      if (res.ok) {
+        setItems(prev =>
+          prev.map(i => (i.id === itemId ? { ...i, status: 'done' as const } : i))
+        )
+      }
+    } catch (err) {
+      console.error('Failed to mark item done:', err)
     }
   }
 

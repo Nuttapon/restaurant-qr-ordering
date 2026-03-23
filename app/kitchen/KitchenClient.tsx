@@ -2,7 +2,6 @@
 import { useState, useCallback } from 'react'
 import { useSoundAlert } from '@/components/shared/SoundAlert'
 import { useKitchenNotifications } from '@/lib/realtime/hooks'
-import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Notification } from '@/types/database'
 import { OrderCard } from '@/components/kitchen/OrderCard'
 import type { OrderWithItems } from '@/components/kitchen/OrderCard'
@@ -19,17 +18,18 @@ export function KitchenClient({ initialOrders }: Props) {
     async (notification: Notification) => {
       playDing()
       if (!notification.order_id) return
-      const supabase = getSupabaseBrowserClient()
-      const { data } = await supabase
-        .from('orders')
-        .select('*, order_items(*, menu_items(*)), tables(number)')
-        .eq('id', notification.order_id)
-        .single()
-      if (data) {
-        setOrders(prev => {
-          const exists = prev.some(o => o.id === (data as OrderWithItems).id)
-          return exists ? prev : [...prev, data as unknown as OrderWithItems]
-        })
+      
+      try {
+        const res = await fetch(`/api/kitchen/orders/${notification.order_id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setOrders(prev => {
+            const exists = prev.some(o => o.id === data.id)
+            return exists ? prev : [...prev, data as OrderWithItems]
+          })
+        }
+      } catch (err) {
+        console.error('Failed to fetch new order:', err)
       }
     },
     [playDing]
