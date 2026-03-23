@@ -1,39 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand */
-  --color-primary: #D4622B;
-  --color-primary-hover: #BF5424;
-  --color-primary-light: #F4E0D3;
+  /* Brand tokens (raw values, referenced by @theme inline) */
+  --brand-primary: #D4622B;
+  --brand-primary-hover: #BF5424;
+  --brand-primary-light: #F4E0D3;
+  --brand-surface: #FBF8F4;
+  --brand-surface-card: #FFFFFF;
+  --brand-text-primary: #2D2926;
+  --brand-text-secondary: #6B6460;
+  --brand-text-muted: #A39E99;
+  --brand-status-available: #4CAF7D;
+  --brand-status-available-bg: #E8F5EE;
+  --brand-status-occupied: #E5A840;
+  --brand-status-occupied-bg: #FDF5E6;
+  --brand-status-bill: #D4627B;
+  --brand-status-bill-bg: #FCEEF2;
+  --brand-kitchen-bg: #1A1A2E;
+  --brand-kitchen-card: #242440;
+  --brand-kitchen-border: #3A3A5C;
+  --brand-shadow-sm: 0 1px 3px rgba(45, 41, 38, 0.06);
+  --brand-shadow-md: 0 4px 12px rgba(45, 41, 38, 0.08);
+  --brand-shadow-lg: 0 8px 24px rgba(45, 41, 38, 0.12);
 
-  /* Surfaces */
-  --color-surface: #FBF8F4;
-  --color-surface-card: #FFFFFF;
-
-  /* Text */
-  --color-text-primary: #2D2926;
-  --color-text-secondary: #6B6460;
-  --color-text-muted: #A39E99;
-
-  /* Status */
-  --color-status-available: #4CAF7D;
-  --color-status-available-bg: #E8F5EE;
-  --color-status-occupied: #E5A840;
-  --color-status-occupied-bg: #FDF5E6;
-  --color-status-bill: #D4627B;
-  --color-status-bill-bg: #FCEEF2;
-
-  /* Kitchen dark */
-  --color-kitchen-bg: #1A1A2E;
-  --color-kitchen-card: #242440;
-  --color-kitchen-border: #3A3A5C;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(45, 41, 38, 0.06);
-  --shadow-md: 0 4px 12px rgba(45, 41, 38, 0.08);
-  --shadow-lg: 0 8px 24px rgba(45, 41, 38, 0.12);
-
-  /* Keep old compat vars */
+  /* Compat tokens for light mode */
   --background: #FBF8F4;
   --foreground: #2D2926;
 }
@@ -41,22 +31,36 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: var(--color-primary);
-  --color-primary-hover: var(--color-primary-hover);
-  --color-primary-light: var(--color-primary-light);
-  --color-surface: var(--color-surface);
-  --color-surface-card: var(--color-surface-card);
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
-  --color-text-muted: var(--color-text-muted);
+  --color-primary: var(--brand-primary);
+  --color-primary-hover: var(--brand-primary-hover);
+  --color-primary-light: var(--brand-primary-light);
+  --color-surface: var(--brand-surface);
+  --color-surface-card: var(--brand-surface-card);
+  --color-text-primary: var(--brand-text-primary);
+  --color-text-secondary: var(--brand-text-secondary);
+  --color-text-muted: var(--brand-text-muted);
+  --color-status-available: var(--brand-status-available);
+  --color-status-available-bg: var(--brand-status-available-bg);
+  --color-status-occupied: var(--brand-status-occupied);
+  --color-status-occupied-bg: var(--brand-status-occupied-bg);
+  --color-status-bill: var(--brand-status-bill);
+  --color-status-bill-bg: var(--brand-status-bill-bg);
+  --color-kitchen-bg: var(--brand-kitchen-bg);
+  --color-kitchen-card: var(--brand-kitchen-card);
+  --color-kitchen-border: var(--brand-kitchen-border);
+  --shadow-sm: var(--brand-shadow-sm);
+  --shadow-md: var(--brand-shadow-md);
+  --shadow-lg: var(--brand-shadow-lg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
+  /* Intentionally limited — this app uses a fixed warm-light theme.
+     Kitchen display uses its own hardcoded dark palette via --brand-kitchen-* tokens. */
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #FBF8F4;
+    --foreground: #2D2926;
   }
 }
 
@@ -66,28 +70,28 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-@keyframes slide-up {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes scale-in {
-  from { transform: scale(0.95); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-
-@keyframes pop {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.12); }
-  100% { transform: scale(1); }
-}
-
 @layer utilities {
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes scale-in {
+    from { transform: scale(0.95); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -106,5 +110,14 @@ body {
   }
   .animate-pop {
     animation: pop 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-slide-up,
+    .animate-fade-in,
+    .animate-scale-in,
+    .animate-pop {
+      animation: none;
+    }
   }
 }
