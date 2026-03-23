@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { QRCodeCanvas } from 'qrcode.react'
 import { nanoid } from 'nanoid'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
@@ -58,7 +58,7 @@ function QRModal({ table, baseUrl, onClose }: QRModalProps) {
 
         <button
           onClick={handleDownload}
-          className="w-full bg-[var(--brand-text-primary)] text-white py-2 rounded-lg text-sm font-medium hover:bg-[var(--brand-text-primary)]/80 transition-colors"
+          className="w-full bg-text-primary text-white py-2 rounded-lg text-sm font-medium hover:bg-text-primary/80 transition-colors"
         >
           Download PNG
         </button>
@@ -71,23 +71,26 @@ interface Props {
   tables: Table[]
 }
 
+const STATUS_LABELS: Record<Table['status'], string> = {
+  available: 'ว่าง',
+  occupied: 'มีลูกค้า',
+  bill_requested: 'ขอเช็คบิล',
+}
+
 const STATUS_BADGE: Record<Table['status'], string> = {
-  available: 'bg-[var(--brand-status-available-bg)]/20 text-[var(--brand-status-available-bg)]',
-  occupied: 'bg-[var(--brand-status-occupied-bg)]/20 text-[var(--brand-status-occupied-bg)]',
-  bill_requested: 'bg-[var(--brand-status-bill-bg)]/20 text-[var(--brand-status-bill-bg)]',
+  available: 'bg-status-available-bg text-status-available border-status-available/10',
+  occupied: 'bg-status-occupied-bg text-status-occupied border-status-occupied/10',
+  bill_requested: 'bg-status-bill-bg text-status-bill border-status-bill/10',
 }
 
 export function TablesClient({ tables: initialTables }: Props) {
   const [tables, setTables] = useState<Table[]>(initialTables)
   const [selectedTable, setSelectedTable] = useState<Table | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [baseUrl, setBaseUrl] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
   const [newTableNumber, setNewTableNumber] = useState('')
 
-  useEffect(() => {
-    setBaseUrl(window.location.origin)
-  }, [])
+
 
   async function handleAddTableSubmit() {
     const tableNumber = parseInt(newTableNumber, 10)
@@ -139,20 +142,20 @@ export function TablesClient({ tables: initialTables }: Props) {
               value={newTableNumber}
               onChange={e => setNewTableNumber(e.target.value)}
               placeholder="โต๊ะ #"
-              className="w-24 border border-[var(--brand-text-muted)]/20 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--brand-primary)] focus:outline-none bg-white"
+              className="w-24 border border-text-muted/20 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white"
               autoFocus
               onKeyDown={e => { if (e.key === 'Enter') handleAddTableSubmit(); if (e.key === 'Escape') { setShowAddForm(false); setNewTableNumber('') } }}
             />
             <button
               onClick={handleAddTableSubmit}
               disabled={!newTableNumber}
-              className="bg-[var(--brand-primary)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--brand-primary-hover)] transition-colors disabled:opacity-50"
+              className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
             >
               เพิ่ม
             </button>
             <button
               onClick={() => { setShowAddForm(false); setNewTableNumber('') }}
-              className="text-[var(--brand-text-muted)] hover:text-[var(--brand-text-secondary)] text-sm transition-colors"
+              className="text-text-muted hover:text-text-secondary text-sm transition-colors"
             >
               ยกเลิก
             </button>
@@ -160,7 +163,7 @@ export function TablesClient({ tables: initialTables }: Props) {
         ) : (
           <button
             onClick={() => setShowAddForm(true)}
-            className="bg-[var(--brand-primary)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--brand-primary-hover)] transition-colors"
+            className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
           >
             + เพิ่มโต๊ะ
           </button>
@@ -189,11 +192,11 @@ export function TablesClient({ tables: initialTables }: Props) {
                   <td className="px-4 py-3">
                     <span
                       className={cn(
-                        'inline-block px-2 py-0.5 rounded-full text-xs font-medium',
+                        'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border',
                         STATUS_BADGE[table.status]
                       )}
                     >
-                      {table.status.replace('_', ' ')}
+                      {STATUS_LABELS[table.status]}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-gray-400 font-mono text-xs hidden sm:table-cell">
@@ -202,7 +205,7 @@ export function TablesClient({ tables: initialTables }: Props) {
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => setSelectedTable(table)}
-                      className="bg-[var(--brand-primary)] text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-[var(--brand-primary-hover)] transition-colors"
+                      className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-primary-hover transition-colors"
                     >
                       QR Code
                     </button>
@@ -217,7 +220,7 @@ export function TablesClient({ tables: initialTables }: Props) {
       {selectedTable && (
         <QRModal
           table={selectedTable}
-          baseUrl={baseUrl}
+          baseUrl={typeof window !== 'undefined' ? window.location.origin : ''}
           onClose={() => setSelectedTable(null)}
         />
       )}
