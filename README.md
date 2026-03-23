@@ -121,6 +121,7 @@ Go to your Supabase project → **SQL Editor** and run each file below **in orde
 | 5 | `supabase/migrations/20260323000005_fix_sessions_index.sql` | Unique index for active sessions |
 | 6 | `supabase/migrations/20260323000006_fix_rpc_conflict_clause.sql` | RPC conflict clause fix |
 | 7 | `supabase/migrations/20260323000007_fix_tables_rls.sql` | INSERT policy for authenticated staff on tables |
+| 8 | `supabase/migrations/20260323000008_storage_policies.sql` | Storage RLS policies for menu image uploads |
 
 > **Tip:** All migrations are idempotent — safe to run multiple times without errors.
 
@@ -334,6 +335,10 @@ Tests are in `lib/__tests__/` and `store/__tests__/` using Vitest + Testing Libr
 **"new row violates row-level security policy" when adding a table**
 - Run migration 7 (`20260323000007_fix_tables_rls.sql`) in the SQL Editor
 - Or run: `CREATE POLICY "staff insert tables" ON tables FOR INSERT TO authenticated WITH CHECK (true);`
+
+**"Image upload failed: new row violates row-level security policy"**
+- Run migration 8 (`20260323000008_storage_policies.sql`) in the SQL Editor
+- Creating the bucket as "Public" only allows reads — write access requires explicit policies
 
 **No sound alerts in kitchen/admin**
 - Sound requires a user interaction first (browser autoplay policy)
