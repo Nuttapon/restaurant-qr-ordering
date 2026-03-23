@@ -26,12 +26,17 @@ export function LoginClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-md w-full max-w-sm p-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Admin Login</h1>
+    <div className="min-h-screen bg-[var(--brand-surface)] flex items-center justify-center p-4">
+      <div className="bg-[var(--brand-surface-card)] rounded-2xl shadow-[var(--brand-shadow-lg)] animate-scale-in w-full max-w-sm p-8">
+        <div className="flex flex-col items-center gap-3 mb-6">
+          <div className="w-14 h-14 rounded-2xl bg-[var(--brand-primary)] flex items-center justify-center shadow-md">
+            <span className="text-white text-2xl font-bold">R</span>
+          </div>
+          <h1 className="text-2xl font-bold text-[var(--brand-text-primary)]">Admin Login</h1>
+        </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-[var(--brand-text-secondary)] mb-1">
               Email
             </label>
             <input
@@ -40,12 +45,12 @@ export function LoginClient() {
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
               placeholder="admin@restaurant.com"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-[var(--brand-text-secondary)] mb-1">
               Password
             </label>
             <input
@@ -54,7 +59,7 @@ export function LoginClient() {
               required
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
               placeholder="••••••••"
             />
           </div>
@@ -64,7 +69,7 @@ export function LoginClient() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold py-2 rounded-lg transition-colors"
+            className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] disabled:opacity-50 text-white font-semibold py-2 rounded-lg transition-colors"
           >
             {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
           </button>
