@@ -3,20 +3,22 @@ import { getSupabaseServerClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   const supabase = await getSupabaseServerClient()
-  const { tableId, type } = await request.json()
+  const { sessionId, tableId, type } = await request.json()
 
-  if (!tableId || !['call_staff', 'bill_request'].includes(type)) {
+  if (!sessionId || !tableId || !['call_staff', 'bill_request'].includes(type)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  // Fix C1: Verify the table exists before inserting a notification
-  const { data: table, error: tableError } = await supabase
-    .from('tables')
-    .select('id')
-    .eq('id', tableId)
+  // Verify session ownership — same pattern as /api/orders
+  const { data: session, error: sessionError } = await supabase
+    .from('sessions')
+    .select('id, table_id, status')
+    .eq('id', sessionId)
+    .eq('table_id', tableId)
+    .eq('status', 'active')
     .single()
-  if (tableError || !table) {
-    return NextResponse.json({ error: 'Invalid table' }, { status: 403 })
+  if (sessionError || !session) {
+    return NextResponse.json({ error: 'Invalid or expired session' }, { status: 403 })
   }
 
   const { error } = await supabase

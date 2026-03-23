@@ -80,7 +80,7 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
       const res = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tableId, type: 'call_staff' }),
+        body: JSON.stringify({ sessionId, tableId, type: 'call_staff' }),
       })
       if (!res.ok) throw new Error('การแจ้งเตือนล้มเหลว')
       setStaffCalled(true)
@@ -98,7 +98,7 @@ export function OrderSummary({ sessionId, tableId, tableNumber, qrToken, onClose
       const res = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tableId, type: 'bill_request' }),
+        body: JSON.stringify({ sessionId, tableId, type: 'bill_request' }),
       })
       if (!res.ok) throw new Error('การส่งคำขอล้มเหลว กรุณาลองใหม่')
       setBillRequested(true)

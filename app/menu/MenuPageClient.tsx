@@ -48,7 +48,7 @@ export function MenuPageClient({ session, table, categories, menuItems }: Props)
       const res = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tableId: table.id, type: 'call_staff' }),
+        body: JSON.stringify({ sessionId: session.id, tableId: table.id, type: 'call_staff' }),
       })
       if (!res.ok) throw new Error('การแจ้งเตือนล้มเหลว')
       setCallStaffSuccess(true)
